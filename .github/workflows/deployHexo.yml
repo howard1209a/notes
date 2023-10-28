@@ -1,0 +1,164 @@
+name: Blog markdown to hexo 
+
+on:
+  push:
+    branches:
+      - master
+      - website_Static
+
+env:
+  GIT_USER: LetMeFly666
+  GIT_EMAIL: 814114971@qq.com
+
+jobs:
+  build:
+    name: Build on node ${{ matrix.node_version }} and ${{ matrix.os }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        node_version: [16.x]
+    
+    steps:
+      # - name: Using cache
+      #   uses: actions/cache@v3
+      #   with:
+      #     path: ~/.deploy_git
+      #     key: deployGit
+      #     restore-keys: deployGit
+
+      # - name: Check if cached
+      #   run: |
+      #     tree .. -d -a
+
+      - name: Checkout this repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Use Node.js ${{ matrix.node_version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node_version }}
+      
+      # - name: Install Python
+      #   uses: actions/setup-python@v1
+      #   with:
+      #     python-version: 3.7
+
+      # - name: Install requirements
+      #   run: |
+      #     pip install requests
+      
+      # - name: Use python to debug
+      #   env:
+      #     GITHUBLEETCODEDEPLOYKEY: ${{ secrets.GITHUBLEETCODEDEPLOYKEY }}
+      #     FORPYTHONDEBUG: ${{ secrets.FORPYTHONDEBUG }}
+      #   run: |
+      #     python debug.py
+      
+      - name: Config environment
+        env:
+          GITHUBLEETCODEDEPLOYKEY: ${{ secrets.GITHUBLEETCODEDEPLOYKEY }}
+        run: |
+          sudo timedatectl set-timezone "Asia/Shanghai"
+          mkdir -p ~/.ssh/
+          echo "${{ secrets.GITHUBLEETCODEDEPLOYKEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          git config --global user.name $GIT_USER
+          git config --global user.email $GIT_EMAIL
+      
+      - name: Install hexo and init
+        run: |
+          npm install -g hexo-cli --save
+          hexo init ../hexoWorkspace
+          rm -f ../hexoWorkspace/source/_posts/hello-world.md  # 不再显示Hello World这篇文章（每次都显示在首页）
+          sed -i 's/"<em>" + text + "<\/em>"/"_" + text + "_"/g' ../hexoWorkspace/node_modules/marked/lib/*
+          # cat ../hexoWorkspace/node_modules/marked/lib/*
+
+      - name: Copy config files from branch website_Static
+        run: |
+          cp -r Solutions ../Articles
+
+          echo --- > ../Articles/README.md
+          echo title: README >> ../Articles/README.md
+          echo date: 9999-12-31 14:53:21 >> ../Articles/README.md
+          echo tags: README >> ../Articles/README.md
+          echo top: true >> ../Articles/README.md
+          echo --- >> ../Articles/README.md
+          cat README.md >> ../Articles/README.md
+
+          git checkout website_Static
+          cp -r ToCopy ../staticFiles
+          # rm -rf ../staticFiles/source/_posts  # 删除了 branch website_Static 的 ToCopy/source/_posts
+          mv ../Articles ../staticFiles/source/_posts
+          # mv -f ../staticFiles/* ../hexoWorkspace
+          rsync -a ../staticFiles/* ../hexoWorkspace
+          # echo tree ../hexoWorkspace/source/_posts
+      
+      - name: Install dependencies
+        run: |
+          cd ../hexoWorkspace
+          npm install hexo-deployer-git --save
+          npm install lodash --save
+          npm install css --save     # 主题fluid需要使用
+          # npm uninstall hexo-renderer-marked --save
+          # sudo apt-get install pandoc
+          # npm install hexo-renderer-pandoc --save
+          cd ../LeetCode
+      
+      - name: Deploy hexo
+        run: |
+          cd ../hexoWorkspace
+          echo hexo g:
+          hexo g
+          echo hexo d:
+          hexo d
+          cd ../LeetCode
+      
+      # - name: Move cache dir to other place
+      #   run: |
+      #     mv ../hexoWorkspace/.deploy_git ..
+      #     tree .. -d -a
+      
+      # - name: Using cache
+      #   uses: actions/cache@v3
+      #   with:
+      #     path: ~/.deploy_git
+      #     key: deployGit
+      #     restore-keys: deployGit
+
+      # - name: Try to keep logs
+      #   run: |
+      #     echo tree -d -a ..
+      #     tree -d -a ..
+      #     mv .deploy_git/.git .deploy_git/git
+      #     rsync -a .deploy_git/* ../LeetCode/.deploy_git
+      #     echo git config --list
+      #     git config --list
+      #     echo git remote -v
+      #     git remote -v
+      #     git add .
+      #     git commit -m "backup .deploy_git"
+      #     git push origin website_Static
+      #     echo cat .git/config
+      #     cat .git/config
+      #     echo ssh -T git@github.com
+      #     ssh -T git@github.com
+      
+      # - name: Push to branch website_Static
+      #   uses: ad-m/github-push-action@master
+      #   with:
+      #     github_token: ${{ secrets.WORKFLOWTOKEN }}
+      #     # branch: ${{ github.ref }}
+      #     # branch: website_Static
+      #     branch: refs/heads/website_Static
+      
+      # - name: Push to branch website_Static
+      #   uses: EndBug/add-and-commit@v9
+      #   with:
+      #     author_name: LetMeFly
+      #     author_email: 814114971@qq.com
+      #     message: "backup .deploy_git"
+      #     add: "."
