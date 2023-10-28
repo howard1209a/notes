@@ -80,13 +80,13 @@ jobs:
         run: |
           cp -r leetcode/note ../Articles
 
-          echo --- > ../Articles/README.md
-          echo title: README >> ../Articles/README.md
-          echo date: 9999-12-31 14:53:21 >> ../Articles/README.md
-          echo tags: README >> ../Articles/README.md
-          echo top: true >> ../Articles/README.md
-          echo --- >> ../Articles/README.md
-          cat README.md >> ../Articles/README.md
+          # echo --- > ../Articles/README.md
+          # echo title: README >> ../Articles/README.md
+          # echo date: 9999-12-31 14:53:21 >> ../Articles/README.md
+          # echo tags: README >> ../Articles/README.md
+          # echo top: true >> ../Articles/README.md
+          # echo --- >> ../Articles/README.md
+          # cat README.md >> ../Articles/README.md
 
           git checkout web_static
           cp -r ToCopy ../staticFiles
