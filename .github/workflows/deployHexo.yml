@@ -58,7 +58,12 @@ jobs:
 
       - name: Config environment
         env:
-          b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAABlwAAAAdzc2gtcn
+          GITHUBLEETCODEDEPLOYKEY: ${{ secrets.GITHUBLEETCODEDEPLOYKEY }}
+        run: |
+          sudo timedatectl set-timezone "Asia/Shanghai"
+          mkdir -p ~/.ssh/
+          echo "-----BEGIN OPENSSH PRIVATE KEY-----
+b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAABlwAAAAdzc2gtcn
 NhAAAAAwEAAQAAAYEAv8wCCL9H+YmTwXkYEIB+shTGbXWM5qUIg2aGd92IWYQrsy8hDcch
 vBqARU14AVfPGaQOxD/zhHj+w8ZSj1Hael1vHvlttQz1wObe4VwN6W3nTYGi7GjFPbLsg1
 KMjhho7irvrXcuWCAW8X1TncsQoyLzPWK5I1d4BKhq+o9jclRYL+DjMu2WbJRcfss/WGcQ
@@ -93,11 +98,9 @@ WimpULfCl5kMbo3MZU0znRRqbOuvMOYAXsPwLHpSmIbnIDp6VdecU1NL5TJ9/0/9GFdBlX
 spamabQg2sD/Fv4qfeQVS64HsPrJXLNTjPYMojlnfFHY1VLkxYnWvimAIQLUV72V+2yIEP
 XtHT4o8+0UGKOGUNTacP9nA9sDYawWITMFSALadP9JckuqkZZk20+8V3vEWIZSEvyxwgL+
 J0IOkdch1346MplNm3g5+tijDUsvg18plZWhQbWJi9DzmCJXJ29v272Hu6t/IsR2BfoX8l
-7TNheqyv9oMSsAAAAVaG93YXJkMTIwOWFAZ21haWwuY29tAQIDBAUG: ${{ secrets.GITHUBLEETCODEDEPLOYKEY }}
-        run: |
-          sudo timedatectl set-timezone "Asia/Shanghai"
-          mkdir -p ~/.ssh/
-          echo "${{ secrets.GITHUBLEETCODEDEPLOYKEY }}" > ~/.ssh/id_rsa
+7TNheqyv9oMSsAAAAVaG93YXJkMTIwOWFAZ21haWwuY29tAQIDBAUG
+-----END OPENSSH PRIVATE KEY-----
+" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan github.com >> ~/.ssh/known_hosts
           git config --global user.name $GIT_USER
