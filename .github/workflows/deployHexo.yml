@@ -105,7 +105,7 @@ jobs:
           # npm uninstall hexo-renderer-marked --save
           # sudo apt-get install pandoc
           # npm install hexo-renderer-pandoc --save
-          # cd ../LeetCode
+          cd ../notes
 
       - name: Deploy hexo
         run: |
@@ -114,7 +114,7 @@ jobs:
           hexo g
           echo hexo d:
           hexo d
-          # cd ../LeetCode
+          cd ../notes
 
       # - name: Move cache dir to other place
       #   run: |
