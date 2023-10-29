@@ -62,45 +62,7 @@ jobs:
         run: |
           sudo timedatectl set-timezone "Asia/Shanghai"
           mkdir -p ~/.ssh/
-          echo "-----BEGIN OPENSSH PRIVATE KEY-----
-b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAABlwAAAAdzc2gtcn
-NhAAAAAwEAAQAAAYEAv8wCCL9H+YmTwXkYEIB+shTGbXWM5qUIg2aGd92IWYQrsy8hDcch
-vBqARU14AVfPGaQOxD/zhHj+w8ZSj1Hael1vHvlttQz1wObe4VwN6W3nTYGi7GjFPbLsg1
-KMjhho7irvrXcuWCAW8X1TncsQoyLzPWK5I1d4BKhq+o9jclRYL+DjMu2WbJRcfss/WGcQ
-9/QU+2t+ESVcjolrgVJTi24zVQ6pFj1rMWJxe/vtJsi4apk2niQZUbimZLeEpUZFrtiltg
-G6bpMwabJtnrI2dpNvGTgx9GK4sB9p/piptXs/m9kECbo4iD/2aNjiE25TTYfh3nnwgZ4J
-VgTXRzI+ZR2SllD/XaK3VkO7jGHVl1vrDok5giA7GNkYZTevtA+Ry8/NRvARrX/tajH1+P
-sYoqJpedo6ezPeh/AEWSmFpJP+vC9zevD+Ucyh+wO8qyCfe+SeuTpilnq35L7bWyvQpr02
-OM37uUBp7cyAQpB1etwIdlh5lUkcxv/5AZuEfHPvAAAFkH/gyWp/4MlqAAAAB3NzaC1yc2
-EAAAGBAL/MAgi/R/mJk8F5GBCAfrIUxm11jOalCINmhnfdiFmEK7MvIQ3HIbwagEVNeAFX
-zxmkDsQ/84R4/sPGUo9R2npdbx75bbUM9cDm3uFcDelt502BouxoxT2y7INSjI4YaO4q76
-13LlggFvF9U53LEKMi8z1iuSNXeASoavqPY3JUWC/g4zLtlmyUXH7LP1hnEPf0FPtrfhEl
-XI6Ja4FSU4tuM1UOqRY9azFicXv77SbIuGqZNp4kGVG4pmS3hKVGRa7YpbYBum6TMGmybZ
-6yNnaTbxk4MfRiuLAfaf6YqbV7P5vZBAm6OIg/9mjY4hNuU02H4d558IGeCVYE10cyPmUd
-kpZQ/12it1ZDu4xh1Zdb6w6JOYIgOxjZGGU3r7QPkcvPzUbwEa1/7Wox9fj7GKKiaXnaOn
-sz3ofwBFkphaST/rwvc3rw/lHMofsDvKsgn3vknrk6YpZ6t+S+21sr0Ka9NjjN+7lAae3M
-gEKQdXrcCHZYeZVJHMb/+QGbhHxz7wAAAAMBAAEAAAGAObeg3RUDCdsW9eAFF+IzPk/2Lr
-ZzQm1jlHdj++pUv+uAYxnJrqXARyUKeNCJTo4oKqUuNGyyUak/sZaa/bo6Lxyy9fVFyHgv
-9G8Fn3feT+Lc+nwKlW4p/Rk9B3/uAEzkNtgA7IizD54IiX+XjCKxzQYVgOGWqUYHPg+Ysf
-I4kQ1ExJO+i3LoE6DJ/PYZB/dsKdHwBoEgnPRLWDGOgopNzeXJ2MzioWi2O1ROpmr3wPYi
-WSHmR8zBOdCBckmvxzTP+g7KVWrkYRsh7NB+sIRdefHdI0uoqKim/xt/zQLJc/a7DTCLu7
-V5CxYZg7zIv6SfEWdJqxXBwjFcJjcDqXvA/lfBgz58vEtYE8LGWDBav7r6OCwcWa+IMUVf
-F59vSBpmz/usUW/XN8H7OFnVp9cZ9/oz8KbkwDjwids+QpzWvc7vGJqdCqaJC4Bq7WxrSZ
-LHitHRRXyfhooLux3KBq9XiJhS7LvxgNilVn5M6OpFvB4hMdyldylXNvTz1NFKwcSxAAAA
-wETNXo5PyjZ1hw6HCV//ALk+oyYS03Rzrg4YR6yR8HDeUl/gAmFXUOXy1Q1zTahofafVDn
-sySqTUW6YXc5WlbWkj/DLqMnWZ7t81AdvDGx4naYDvHz4GqlUbU/GtaVDqXhrIm4X6BK2P
-8SyCEivHnGNG5Zi6a614QPie6EXSIyxpffA8DL3Lh49f2Ii12xVwsTcFhNgoJE83x/Ir68
-f3S5uLs6xqD2OsmHNc+Z3pNLftnw83pRybo8zHsAmE+cW5QQAAAMEA5UJ7g+J5ygTrWpsW
-OSlRLszf+3LYTRiTaXlg+vNLlELXMRp8TViQxloD+YrO2shn89/vFf9SECXxpZdwpdOboe
-lXp2mYCBxRsTAp6AJvC7SXGclD8XiTR0cE/U7/VPEk52UrU7KJt+i/uMTAdSoft9y/hbui
-WimpULfCl5kMbo3MZU0znRRqbOuvMOYAXsPwLHpSmIbnIDp6VdecU1NL5TJ9/0/9GFdBlX
-3dnAa6r/IaVY3GfrryLoKHkchzl/5NAAAAwQDWKupa9/NOMLgrifBlkq7WIKe2Tnnd5O2/
-spamabQg2sD/Fv4qfeQVS64HsPrJXLNTjPYMojlnfFHY1VLkxYnWvimAIQLUV72V+2yIEP
-XtHT4o8+0UGKOGUNTacP9nA9sDYawWITMFSALadP9JckuqkZZk20+8V3vEWIZSEvyxwgL+
-J0IOkdch1346MplNm3g5+tijDUsvg18plZWhQbWJi9DzmCJXJ29v272Hu6t/IsR2BfoX8l
-7TNheqyv9oMSsAAAAVaG93YXJkMTIwOWFAZ21haWwuY29tAQIDBAUG
------END OPENSSH PRIVATE KEY-----
-" > ~/.ssh/id_rsa
+          echo "${{ secrets.GITHUBLEETCODEDEPLOYKEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan github.com >> ~/.ssh/known_hosts
           git config --global user.name $GIT_USER
