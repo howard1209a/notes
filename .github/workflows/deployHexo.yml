@@ -95,6 +95,7 @@ jobs:
           mv ../Articles ../staticFiles/source/_posts
           # mv -f ../staticFiles/* ../hexoWorkspace
           rsync -a ../staticFiles/* ../hexoWorkspace
+          sudo apt-get install tree
           echo tree ../hexoWorkspace/source/_posts
 
       - name: Install dependencies
