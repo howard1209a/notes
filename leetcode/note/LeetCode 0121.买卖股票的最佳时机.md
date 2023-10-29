@@ -1,5 +1,5 @@
 ---
-title: 121.买卖股票的最佳时机
+title: 121.买卖股票的最佳时机1111111111
 date: 2022-07-19 11:03:37
 tags: [题解, LeetCode, 简单, 数组, 动态规划, 模拟]
 ---
@@ -42,8 +42,6 @@ tags: [题解, LeetCode, 简单, 数组, 动态规划, 模拟]
 	<li><code>0 <= prices[i] <= 10<sup>4</sup></code></li>
 </ul>
 
-
-    
 ## 方法一：从后往前模拟
 
 使用两个变量：
@@ -59,10 +57,10 @@ int ans = 0;  // 代表最大收益
 
 这样，就判断今天买入股票的话，能够赚取多少钱即可。
 
-+ 时间复杂度$O(N)$，其中$N$为已知股票金额的天数($prices.size()$)。
-+ 空间复杂度$O(1)$
+- 时间复杂度$O(N)$，其中$N$为已知股票金额的天数($prices.size()$)。
+- 空间复杂度$O(1)$
 
-### AC代码
+### AC 代码
 
 #### C++
 
@@ -95,5 +93,5 @@ class Solution:
         return
 ```
 
-> 同步发文于CSDN，原创不易，转载请附上[原文链接](https://blog.tisfy.eu.org/2022/07/19/LeetCode%200121.%E4%B9%B0%E5%8D%96%E8%82%A1%E7%A5%A8%E7%9A%84%E6%9C%80%E4%BD%B3%E6%97%B6%E6%9C%BA/)哦~
+> 同步发文于 CSDN，原创不易，转载请附上[原文链接](https://blog.tisfy.eu.org/2022/07/19/LeetCode%200121.%E4%B9%B0%E5%8D%96%E8%82%A1%E7%A5%A8%E7%9A%84%E6%9C%80%E4%BD%B3%E6%97%B6%E6%9C%BA/)哦~
 > Tisfy：[https://letmefly.blog.csdn.net/article/details/125867999](https://letmefly.blog.csdn.net/article/details/125867999)
