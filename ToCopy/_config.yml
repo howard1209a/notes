@@ -103,5 +103,5 @@ theme: fluid
 ## Docs: https://hexo.io/docs/one-command-deployment
 deploy:
   type: git
-  repository: https://github.com/howard1209a/notes.git
+  repository: git@github.com:howard1209a/notes.git
   branch: web
