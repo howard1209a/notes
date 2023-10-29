@@ -78,6 +78,7 @@ jobs:
 
       - name: Copy config files from branch web_static
         run: |
+          git checkout main
           cp -r leetcode/note ../Articles
 
           # echo --- > ../Articles/README.md
@@ -94,7 +95,7 @@ jobs:
           mv ../Articles ../staticFiles/source/_posts
           # mv -f ../staticFiles/* ../hexoWorkspace
           rsync -a ../staticFiles/* ../hexoWorkspace
-          # echo tree ../hexoWorkspace/source/_posts
+          echo tree ../hexoWorkspace/source/_posts
 
       - name: Install dependencies
         run: |
