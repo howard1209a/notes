@@ -1,7 +1,7 @@
 ---
 title: Unicode和UTF-8的关系
 date: 2023-10-29 13:00:29
-tags: [UTF-8]
+tags: [计算机基础, 编码]
 ---
 
 # Unicode 和 UTF-8 的关系

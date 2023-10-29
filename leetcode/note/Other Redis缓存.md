@@ -1,7 +1,7 @@
 ---
 title: Redis缓存
 date: 2023-10-29 12:48:14
-tags: [Redis, 中间件，缓存]
+tags: [Redis, 中间件, 缓存]
 ---
 
 # Redis 缓存
