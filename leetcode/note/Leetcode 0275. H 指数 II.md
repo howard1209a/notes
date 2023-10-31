@@ -1,7 +1,7 @@
 ---
 title: 275. H 指数 II
 date: 2023-10-30 13:48:44
-tags: [Leecode, 二分法]
+tags: [Leetcode, 二分法]
 ---
 
 # 275.H 指数 II

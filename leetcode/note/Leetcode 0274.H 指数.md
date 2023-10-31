@@ -1,7 +1,7 @@
 ---
 title: 274.H 指数
 date: 2023-10-30 12:42:50
-tags: [Leecode, 排序, 动态规划]
+tags: [Leetcode, 排序, 动态规划]
 ---
 
 # 274.H 指数
