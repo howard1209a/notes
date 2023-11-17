@@ -79,6 +79,6 @@ class NumArray {
 }
 ```
 
-## 参考博客
+## 参考资料
 
 https://blog.csdn.net/Jxianxu/article/details/108214752
