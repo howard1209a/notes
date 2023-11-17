@@ -208,7 +208,18 @@ private void merge(int[] nums, int[] tmpNums, int start1, int end1, int start2, 
 
 以大根堆为例，大根堆的定义为一个完全二叉树，其根节点大于等于左右子树所有节点，且左右子树均为大根堆。（注意，完全二叉树的左右子树一定是完全二叉树），堆排序的关键操作是 heapUp 和 heapDown。
 
-- heapUp：heapUp 主要用于对于一个现有堆，我们在完全二叉树的末尾添加一个节点，然后自底向上进行调整的过程。
+heapUp 主要用于对于一个现有堆，我们在完全二叉树的末尾添加一个节点，然后自底向上进行调整的过程。对于添加节点的父节点，如果父节点大于等于添加节点，那么不用做任何事。如果父节点小于添加节点，两者交换，然后继续探查添加节点的父节点，直到父节点大于等于添加节点或添加节点被交换到根节点。
+
+heapDown 主要用于当我们将一个堆的根节点替换为一个其他节点后，自顶向下进行调整的过程。如果根节点有两个子节点（如果根节点有一个子节点，则这个子节点就是更大者），取更大者与根节点相比较，如果更大者小于等于根节点，那么不用做任何事，反之交换根节点与更大者，重复这个过程直到根节点大于等于更大者或根节点延伸到了叶节点。
+
+heapify 是建堆过程，我们首先初始化一个只有一个元素的堆，然后不断地将元素添加到完全二叉树的末尾并 heapUp 调整。
+
+heapSort 排序过程我们采用原地调整的方式，交换堆顶的数和完全二叉树的最后一个数，然后 heapDown 调整（大根堆中少一个数，完全二叉树少一个数）。
+
+- heapUp 操作的时间复杂度$O(logn)$
+- heapDown 操作的时间复杂度$O(logn)$
+- heapify 建堆的时间复杂度$O(nlogn)$
+- heapSort 排序的时间复杂度$O(nlogn)$
 
 ### 模板代码
 
@@ -266,6 +277,50 @@ private void heapUp(int[] nums, int index) {
 
 ## 桶排序
 
+- 最好情况时间复杂度$O(n)$
+- 空间复杂度$O(n)$
+
+适用于数据均匀分布的情况，即当我们切分多个区间时，每个区间的元素数目大致相等。
+
 ### 算法原理
 
+桶排序将原数组划分到称为 「桶」 的多个区间中，然后对每个桶单独进行排序，之后再按桶序和桶内序输出结果。其中对于每个桶进行排序的排序算法可以自己选择。
+
+找最大最小值和分配桶的过程耗费$O(n)$的时间复杂度和$O(n)$的空间复杂度，假设有 k 个桶，且数据分布均匀，若每个桶都采用$O(n^2)$的排序算法，那么总时间复杂度为$O(n^2/k)$，若每个桶都采用$O(nlogn)$的排序算法，总时间复杂度为$O(k*(n/k)*log(n/k))$，即$O(n*log(n/k))$，这时如果 $k=n/p$，p 是一个常数，那么理论上时间复杂度可以降到$O(n)$。
+
 ### 模板代码
+
+```java
+public int[] bucketSort(int[] arr) {
+    if(arr.length < 2) return arr;
+    int n = arr.length, k = n / 3, min = arr[0], max = arr[0]; // k=n/3 个桶
+    for (int i = 1; i < n; i++) { // 确定 min 和 max
+        min = Math.min(min, arr[i]);
+        max = Math.max(max, arr[i]);
+    }
+    List<ArrayList<Integer>> buckets = new ArrayList<>(k);
+    for (int i = 0; i < k; i++) { // k 个桶
+        buckets.add(new ArrayList<>()); // 每个桶是一个ArrayList<Integer>
+    }
+    double interval = (max - min) * 1.0 / (k - 1); // 桶间隔
+    for (int num : arr) { // 遍历arr，根据元素值将所有元素装入对应值区间的桶中
+        int bucketIdx = (int) ((num - min) / interval); // arr[i] (num) 元素应该装入的桶的下标
+        buckets.get(bucketIdx).add(num); // 装入对应桶中
+    }
+    for (ArrayList<Integer> bucket : buckets) {
+        Collections.sort(bucket); // 桶内排序(调用库函数，从小到大)
+    }
+    int index = 0;
+    for (ArrayList<Integer> bucket : buckets) {
+        for (int sortedNum : bucket) {
+            arr[index] = sortedNum; // 复用输入数组arr
+            index++;
+        }
+    }
+    return arr;
+}
+```
+
+## 参考资料
+
+https://leetcode.cn/circle/discuss/eBo9UB/
