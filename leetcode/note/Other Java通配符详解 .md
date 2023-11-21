@@ -1,7 +1,7 @@
 ---
 title: Java通配符详解
 date: 2023-11-19 21:21:33
-tags: [Java]
+tags: [Java, 八股文]
 ---
 
 # Java 通配符详解

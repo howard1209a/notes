@@ -1,7 +1,7 @@
 ---
 title: git中的merge操作
 date: 2023-10-29 11:56:42
-tags: [git]
+tags: [日常笔记]
 ---
 
 # git 中的 merge 操作

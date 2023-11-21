@@ -1,7 +1,7 @@
 ---
 title: Java中的权限选择
 date: 2023-10-29 12:37:12
-tags: [Java]
+tags: [Java, 八股文]
 ---
 
 # Java 中的权限选择

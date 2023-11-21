@@ -1,7 +1,7 @@
 ---
 title: wireshark教程
 date: 2023-10-29 13:05:18
-tags: [wireshark, 计算机网络]
+tags: [日常笔记]
 ---
 
 # wireshark 教程

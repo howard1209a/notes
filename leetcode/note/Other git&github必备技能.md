@@ -1,7 +1,7 @@
 ---
 title: git&github必备技能
 date: 2023-10-29 11:52:59
-tags: [git]
+tags: [日常笔记]
 ---
 
 # git&github 必备技能
