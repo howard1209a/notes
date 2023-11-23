@@ -1,7 +1,7 @@
 ---
 title: 图论最短路总结
 date: 2023-11-14 21:59:59
-tags: [Leetcode, 图论, 最短路问题]
+tags: [Leetcode总结]
 ---
 
 # 图论最短路总结

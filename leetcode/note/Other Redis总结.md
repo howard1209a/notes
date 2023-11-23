@@ -1,7 +1,7 @@
 ---
 title: Redis总结
 date: 2023-10-29 12:48:14
-tags: [Redis, 中间件, 八股文]
+tags: [Redis, 八股文]
 ---
 
 # Redis 总结

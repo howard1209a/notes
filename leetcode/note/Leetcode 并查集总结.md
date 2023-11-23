@@ -1,7 +1,7 @@
 ---
 title: 并查集总结
 date: 2023-11-16 17:41:46
-tags: [Leetcode, 并查集]
+tags: [Leetcode总结]
 ---
 
 # 并查集总结

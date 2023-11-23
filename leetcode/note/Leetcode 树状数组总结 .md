@@ -1,7 +1,7 @@
 ---
 title: 树状数组总结
 date: 2023-11-13 22:53:26
-tags: [Leetcode, 树状数组]
+tags: [Leetcode总结]
 ---
 
 # 树状数组总结

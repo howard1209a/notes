@@ -1,7 +1,7 @@
 ---
 title: 二叉树遍历总结
 date: 2023-11-08 13:19:51
-tags: [Leetcode, 二叉树]
+tags: [Leetcode总结]
 ---
 
 # 二叉树遍历总结

@@ -1,7 +1,7 @@
 ---
 title: 单调栈总结
 date: 2023-11-12 09:59:29
-tags: [Leetcode, 单调栈]
+tags: [Leetcode总结]
 ---
 
 # 单调栈总结

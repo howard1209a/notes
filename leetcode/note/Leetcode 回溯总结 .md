@@ -1,7 +1,7 @@
 ---
 title: 回溯总结
 date: 2023-11-09 13:10:57
-tags: [Leetcode, 回溯]
+tags: [Leetcode总结]
 ---
 
 # 回溯总结

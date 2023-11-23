@@ -1,7 +1,7 @@
 ---
 title: 最小生成树总结
 date: 2023-11-16 19:33:47
-tags: [Leetcode, 最小生成树]
+tags: [Leetcode总结]
 ---
 
 # 最小生成树总结

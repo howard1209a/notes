@@ -1,7 +1,7 @@
 ---
 title: 动态规划总结
 date: 2023-11-11 22:07:48
-tags: [Leetcode, 动态规划, 子序列]
+tags: [Leetcode总结]
 ---
 
 # 动态规划总结

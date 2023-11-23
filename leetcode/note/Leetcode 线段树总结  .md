@@ -1,7 +1,7 @@
 ---
 title: 线段树总结
 date: 2023-11-17 09:51:25
-tags: [Leetcode, 线段树]
+tags: [Leetcode总结]
 ---
 
 # 线段树总结
