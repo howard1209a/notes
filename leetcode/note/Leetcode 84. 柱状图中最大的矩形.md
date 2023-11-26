@@ -1,7 +1,7 @@
 ---
 title: 84.柱状图中最大的矩形
 date: 2023-11-12 14:42:02
-tags: [Leetcode, 单调栈]
+tags: [Leetcode题解]
 ---
 
 # 【LetMeFly】84.柱状图中最大的矩形

@@ -1,7 +1,7 @@
 ---
 title: 142. 环形链表 II
 date: 2023-10-30 19:49:48
-tags: [Leetcode, 哈希表, 快慢指针]
+tags: [Leetcode题解]
 ---
 
 # 142.环形链表 II

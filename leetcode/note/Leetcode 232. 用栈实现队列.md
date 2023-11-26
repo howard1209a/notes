@@ -1,7 +1,7 @@
 ---
 title: 232. 用栈实现队列
 date: 2023-11-02 13:29:03
-tags: [Leetcode, 栈, 队列]
+tags: [Leetcode题解]
 ---
 
 # 232.用栈实现队列

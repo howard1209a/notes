@@ -1,7 +1,7 @@
 ---
 title: 15.三数之和
 date: 2023-10-30 22:21:46
-tags: [Leetcode, 哈希表, 双指针, 排序]
+tags: [Leetcode题解]
 ---
 
 # 15.三数之和

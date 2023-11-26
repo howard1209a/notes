@@ -1,7 +1,7 @@
 ---
 title: 1049.最后一块石头的重量 II
 date: 2023-11-11 10:08:33
-tags: [Leetcode, 背包问题]
+tags: [Leetcode题解]
 ---
 
 # 1049.最后一块石头的重量 II

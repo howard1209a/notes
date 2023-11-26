@@ -1,7 +1,7 @@
 ---
 title: 98. 验证二叉搜索树
 date: 2023-11-09 09:48:13
-tags: [Leetcode, 二叉搜索树]
+tags: [Leetcode题解]
 ---
 
 # 98.验证二叉搜索树

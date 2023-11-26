@@ -1,7 +1,7 @@
 ---
 title: 42. 接雨水
 date: 2023-11-12 14:09:35
-tags: [Leetcode, 单调栈]
+tags: [Leetcode题解]
 ---
 
 # 42.接雨水

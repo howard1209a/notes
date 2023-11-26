@@ -1,7 +1,7 @@
 ---
 title: 225. 用队列实现栈
 date: 2023-11-02 13:50:23
-tags: [Leetcode, 队列, 栈]
+tags: [Leetcode题解]
 ---
 
 # 225.用队列实现栈
