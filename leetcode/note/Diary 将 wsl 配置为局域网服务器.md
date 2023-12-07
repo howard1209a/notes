@@ -37,6 +37,37 @@ win 中 NAT 映射（端口转发）可以通过以下命令完成：
 
 我们可以通过上述命令开放一些端口（比如 ssh 的 22，mysql 的 3306，redis 的 6379）
 
+下面是常用服务的端口开放：
+
+```shell
+# ssh
+netsh interface portproxy add v4tov4 listenport=22 listenaddress=0.0.0.0 connectport=22 connectaddress=172.26.17.30
+
+# mysql
+netsh interface portproxy add v4tov4 listenport=3306 listenaddress=0.0.0.0 connectport=3306 connectaddress=172.26.17.30
+
+# redis
+netsh interface portproxy add v4tov4 listenport=6379 listenaddress=0.0.0.0 connectport=6379 connectaddress=172.26.17.30
+
+# nacos
+netsh interface portproxy add v4tov4 listenport=8848 listenaddress=0.0.0.0 connectport=8848 connectaddress=172.26.17.30
+
+# rabbitmq web管理
+netsh interface portproxy add v4tov4 listenport=15672 listenaddress=0.0.0.0 connectport=15672 connectaddress=172.26.17.30
+
+# rabbitmq 消息通信
+netsh interface portproxy add v4tov4 listenport=5672 listenaddress=0.0.0.0 connectport=5672 connectaddress=172.26.17.30
+
+# es外部通信
+netsh interface portproxy add v4tov4 listenport=9200 listenaddress=0.0.0.0 connectport=9200 connectaddress=172.26.17.30
+
+# es集群通信
+netsh interface portproxy add v4tov4 listenport=9300 listenaddress=0.0.0.0 connectport=9300 connectaddress=172.26.17.30
+
+# Kibana-es可视化工具
+netsh interface portproxy add v4tov4 listenport=5601 listenaddress=0.0.0.0 connectport=5601 connectaddress=172.26.17.30
+```
+
 ## 配置 ssh
 
 查看服务器是否安装了 ssh-server
