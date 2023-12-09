@@ -41,7 +41,7 @@ win 中 NAT 映射（端口转发）可以通过以下命令完成：
 
 ```shell
 # ssh
-netsh interface portproxy add v4tov4 listenport=22 listenaddress=0.0.0.0 connectport=22 connectaddress=172.26.17.30
+netsh interface portproxy add v4tov4 listenport=22 listenaddress=0.0.0.0 connectport=22 connectaddress=172.20.5.187
 
 # mysql
 netsh interface portproxy add v4tov4 listenport=3306 listenaddress=0.0.0.0 connectport=3306 connectaddress=172.26.17.30
@@ -170,6 +170,13 @@ service mysql restart
 
 为 root 用户设置密码
 
+```shell
+# 刷新一下
+flush privileges;
+# 设置密码
+ALTER USER 'root'@'%' IDENTIFIED BY '123456';
+```
+
 SHA2 认证改为密码认证（mysql 8.0 默认 SHA2 认证 5.7 默认密码认证）
 
 ```shell
@@ -217,3 +224,5 @@ win 配置端口转发
 ```shell
 netsh interface portproxy add v4tov4 listenport=6379 listenaddress=0.0.0.0 connectport=6379 connectaddress=wsl虚拟网卡ip
 ```
+
+share (file://DESKTOP-QVOGF9U/share)
