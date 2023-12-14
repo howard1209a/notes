@@ -710,3 +710,231 @@ public static void main(String[] args) throws IOException {
 ```
 
 ## Netty
+
+在异步编程中，Future 可以看作是一个多线程结果容器
+
+### pipeline 过程
+
+一个 channel 有一个 pipeline，pipeline 是一个 `AbstractChannelHandlerContext`类型 的双向链表，`AbstractChannelHandlerContext` 是一个抽象父类，有三种实现分别是`HeadContext`、`TailContext`和`DefaultChannelHandlerContext`。pipeline 的头节点是 `HeadContext` 对象，尾节点是 `TailContext` 对象，中间都是我们自行添加的 `DefaultChannelHandlerContext` 对象。
+
+#### 链式调用例子
+
+下面是服务端代码的一个典型模板，首先初始化了一个服务器的 `Bootstrap` 对象，然后设置 `NioEventLoopGroup`，设置 channel 类型，添加一个对 `NioSocketChannel` 做初始化操作的回调，在回调中按顺序添加了一些`ChannelHandler`，每一个 `ChannelHandler` 都关联 pipeline 中的一个 `DefaultChannelHandlerContext`。
+
+`ChannelHandler` 有两个子接口，分别是 `ChannelInboundHandler` 和 `ChannelOutboundHandler`，对应有 `ChannelInboundHandlerAdapter` 和 `ChannelOutboundHandlerAdapter` 实现。`ChannelInboundHandlerAdapter` 是入站处理器，用于处理收到的消息，里面定义了一些方法比如`channelRegistered`、`channelActive`、`channelRead`等等。`ChannelOutboundHandlerAdapter` 是出站处理器，用于处理发出的消息，里面定义了一些方法比如`write`等等。我们在`ch.pipeline().addLast()`中添加的 `ChannelHandler`，可以是入站处理器、出站处理器或者出入站处理器。
+
+下面这段代码中，ctx 对象的编译类型是 `ChannelHandlerContext`，而实际运行类型则是当前 `ChannelHandler` 对应的 `DefaultChannelHandlerContext` 对象。其中，`ctx.fireChannelRead(msg)`用于继续执行下一个 `InboundHandler` 的 `channelRead` 方法，`ctx.channel().write(msg)`是先获取当前 `DefaultChannelHandlerContext` 对象所在 pipeline 对应的 channel，然后由 channel 对象调 write 方法，channel 对象调 write 方法会返回一个 future，说明 write 方法的调用栈存在异步任务提交操作。channel 对象调 write 方法的具体过程是先执行 pipeline 最后一个 `OutboundHandler`（也就是 `TailContext`）的 write 方法，然后再依次向前执行每个 `OutboundHandler` 的 write 方法，直到最后执行了 `HeadContext` 的 write 方法，在 `HeadContext` 的 write 方法中会提交一个真正将 bytebuf 写入到 tcp 发送缓冲区的异步任务，这也就是返回 future 的原因，可以看到这其实是一个链式方法栈的调用过程。`ctx.write(msg, promise)`是 `ChannelHandlerContext` 对象调 write 方法，这回不会找 pipeline 中最后一个 `OutboundHandler`，而是找当前位置的前一个 `OutboundHandler`。
+
+如果 eventloop 底层的 selector 触发了 IO 的可读事件，则底层会首先拿到一个原始的 bytebuf（里面放了本次从 tcp 接收缓冲区中读出的数据），然后将 bytebuf 传给第一个`InboundHandler`（也就是 `HeadContext`）的 channelRead 方法，然后再依次向后链式调用，需要注意的是这个链式调用依靠 `fireChannelRead`，也就是说如果某个 `channelRead` 方法没有调 `ctx.fireChannelRead`，那么链式调用到这里就截止了。
+
+```java
+new ServerBootstrap()
+    .group(new NioEventLoopGroup())
+    .channel(NioServerSocketChannel.class)
+    .childHandler(new ChannelInitializer<NioSocketChannel>() {
+        protected void initChannel(NioSocketChannel ch) {
+            ch.pipeline().addLast(new ChannelInboundHandlerAdapter(){
+                @Override
+                public void channelRead(ChannelHandlerContext ctx, Object msg) {
+                    System.out.println(1);
+                    ctx.fireChannelRead(msg); // 1
+                }
+            });
+            ch.pipeline().addLast(new ChannelInboundHandlerAdapter(){
+                @Override
+                public void channelRead(ChannelHandlerContext ctx, Object msg) {
+                    System.out.println(2);
+                    ctx.fireChannelRead(msg); // 2
+                }
+            });
+            ch.pipeline().addLast(new ChannelInboundHandlerAdapter(){
+                @Override
+                public void channelRead(ChannelHandlerContext ctx, Object msg) {
+                    System.out.println(3);
+                    ctx.channel().write(msg); // 3
+                }
+            });
+            ch.pipeline().addLast(new ChannelOutboundHandlerAdapter(){
+                @Override
+                public void write(ChannelHandlerContext ctx, Object msg,
+                                  ChannelPromise promise) {
+                    System.out.println(4);
+                    ctx.write(msg, promise); // 4
+                }
+            });
+            ch.pipeline().addLast(new ChannelOutboundHandlerAdapter(){
+                @Override
+                public void write(ChannelHandlerContext ctx, Object msg,
+                                  ChannelPromise promise) {
+                    System.out.println(5);
+                    ctx.write(msg, promise); // 5
+                }
+            });
+            ch.pipeline().addLast(new ChannelOutboundHandlerAdapter(){
+                @Override
+                public void write(ChannelHandlerContext ctx, Object msg,
+                                  ChannelPromise promise) {
+                    System.out.println(6);
+                    ctx.write(msg, promise); // 6
+                }
+            });
+        }
+    })
+    .bind(8080);
+```
+
+上面这段代码的执行结果是
+
+```java
+1
+2
+3
+6
+5
+4
+```
+
+#### 固定长度接收分组例子
+
+##### LoggingHandler
+
+下面这段代码在 pipeline 的最开始加了一个 `LoggingHandler` 对象，`LoggingHandler` 同时实现了 `ChannelInboundHandler` 接口和 `ChannelOutboundHandler` 接口，是一个出入站处理器，`LoggingHandler` 对出入站的所有方法都在链式的基础上做了打印日志的增强。针对正向的读过程，它将会打印原始 bytebuf，针对反向的写过程，它将会打印给到 `HeadContext` 的 write 方法之前的最终 bytebuf。
+
+##### 客户端代码
+
+在`SocketChannel`完全准备好之后，会从前向后链式调用 pipeline 中 每个 `InboundHandler` 的 `channelActive` 方法，首先走 `HeadContext`的 `channelActive` 方法（执行一些默认操作），然后走 `LoggingHandler` 的 `channelActive` 方法（执行一些日志操作），然后走自己写的 `channelActive` 方法，生成一个 bytebuf，然后调 `ctx.writeAndFlush(buffer)`，然后走当前位置的前一个 `ChannelOutboundHandler`（也就是 `LoggingHandler`）的 write 方法（执行一些日志操作），然后走 `HeadContext` 的 write 方法，提交一个将 bytebuf 写入 tcp 发送缓冲区的异步任务，最后方法栈递归返回。
+
+```java
+public static void main(String[] args) {
+    NioEventLoopGroup worker = new NioEventLoopGroup();
+    try {
+        Bootstrap bootstrap = new Bootstrap();
+        bootstrap.channel(NioSocketChannel.class);
+        bootstrap.group(worker);
+        bootstrap.handler(new ChannelInitializer<SocketChannel>() {
+            @Override
+            protected void initChannel(SocketChannel ch) throws Exception {
+                log.debug("connetted...");
+                ch.pipeline().addLast(new LoggingHandler(LogLevel.DEBUG));
+                ch.pipeline().addLast(new ChannelInboundHandlerAdapter() {
+                    @Override
+                    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+                        log.debug("sending...");
+                        // 发送内容随机的数据包
+                        Random r = new Random();
+                        char c = 'a';
+                        ByteBuf buffer = ctx.alloc().buffer();
+                        for (int i = 0; i < 10; i++) {
+                            byte[] bytes = new byte[8];
+                            for (int j = 0; j < r.nextInt(8); j++) {
+                                bytes[j] = (byte) c;
+                            }
+                            c++;
+                            buffer.writeBytes(bytes);
+                        }
+                        ctx.writeAndFlush(buffer);
+                    }
+                });
+            }
+        });
+        ChannelFuture channelFuture = bootstrap.connect("localhost", 9090).sync();
+        channelFuture.channel().closeFuture().sync();
+
+    } catch (InterruptedException e) {
+        log.error("client error", e);
+    } finally {
+        worker.shutdownGracefully();
+    }
+}
+```
+
+##### 服务端代码
+
+`FixedLengthFrameDecoder` 可以按照固定长度接收分组，它是一个入站处理器，实现了 `ChannelInboundHandler` 接口。对于原始的 bytebuf，按照固定长度进行切分，对于每个切分都要链式调一遍 pipeline 上接下来的 `ChannelInboundHandler`。如果不够切分长度了则会保存下来拼接到下一次的 bytebuf 继续处理。
+
+```java
+public static void main(String[] args) throws InterruptedException {
+    new ServerBootstrap()
+            .group(new NioEventLoopGroup())
+            .channel(NioServerSocketChannel.class)
+            .childHandler(new ChannelInitializer<NioSocketChannel>() {
+                protected void initChannel(NioSocketChannel ch) {
+                    ch.pipeline().addLast(new FixedLengthFrameDecoder(8));
+                    ch.pipeline().addLast(new LoggingHandler(LogLevel.DEBUG));
+                }
+            })
+            .bind(9090);
+}
+```
+
+### 一些其他的 ChannelHandler
+
+固定分隔符，默认以 \n 或 \r\n 作为分隔符
+
+```java
+ch.pipeline().addLast(new LineBasedFrameDecoder(1024));
+```
+
+预设长度，在发送消息前，先约定用定长字节表示接下来数据的长度
+
+```java
+// 最大长度，长度偏移，长度占用字节，长度调整，剥离字节数
+ch.pipeline().addLast(new LengthFieldBasedFrameDecoder(1024, 0, 1, 0, 1));
+```
+
+http 协议解析
+
+```java
+ch.pipeline().addLast(new HttpServerCodec());
+```
+
+### Bind 过程
+
+```java
+//1 netty 中使用 NioEventLoopGroup （简称 nio boss 线程）来封装线程和 selector
+Selector selector = Selector.open();
+
+//2 创建 NioServerSocketChannel，同时会初始化它关联的 handler，以及为原生 ssc 存储 config
+NioServerSocketChannel attachment = new NioServerSocketChannel();
+
+//3 创建 NioServerSocketChannel 时，创建了 java 原生的 ServerSocketChannel
+ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
+serverSocketChannel.configureBlocking(false);
+
+//4 启动 nio boss 线程执行接下来的操作
+
+//5 注册（仅关联 selector 和 NioServerSocketChannel），未关注事件
+SelectionKey selectionKey = serverSocketChannel.register(selector, 0, attachment);
+
+//6 head -> 初始化器 -> ServerBootstrapAcceptor -> tail，初始化器是一次性的，只为添加 acceptor
+
+//7 绑定端口
+serverSocketChannel.bind(new InetSocketAddress(8080));
+
+//8 触发 channel active 事件，在 head 中关注 op_accept 事件
+selectionKey.interestOps(SelectionKey.OP_ACCEPT);
+```
+
+上面过程是 java 原生 nio 代码，在 netty 中，这些逻辑都被放在了 `bind` 方法中。`bind` 是一个异步方法，会返回一个 future，`bind` 方法主要提交了先后两个异步任务，在第一个异步任务中会初始化 `ServerSocketChannel` 对象并将其绑定给某个 eventloop，在这个异步任务中会执行 `channelRegistered` 的链式调用。在第二个异步任务中会真正为 `ServerSocketChannel` 绑定某个 tcp 端口，然后将 `ServerSocketChannel` 绑定给 eventloop 对应的 `selector`，最后绑定 OP_ACCEPT 事件。
+
+### Eventloop 过程
+
+```java
+public static void main(String[] args) {
+        NioEventLoopGroup eventExecutors = new NioEventLoopGroup(1);
+        eventExecutors.execute(new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("1");
+            }
+        });
+    }
+```
+
+我们可以从以上这段代码开始调试（核心在 NioEventLoop 的 run 方法），分析可以得出如下要点：
+
+- eventloop 会在第一次有异步任务提交的时候开启线程。
+- eventloop 采用队列来存储提交的异步任务（自己的或其他线程的）。
+- eventloop 支持处理多路 IO 事件、执行普通任务和执行定时任务。
+- 在 run 方法的循环中，如果任务队列有任务，则会调`this.selector.selectNow()`来非阻塞式的获取所有事件，然后调`this.processSelectedKeys()`处理所有的事件，再调`this.runAllTasks(ioTime * (long)(100 - ioRatio) / (long)ioRatio)`按照时间比例限制去执行队列中的一些任务，ioRatio 是处理事件时间占总时间（处理事件时间+执行任务时间）的占比。比如本次循环处理事件用了 8s，而 ioRatio 被设成 80%，那么本次循环留给任务执行的时间只有 2s，`runAllTasks` 方法的内部会不断地从队头 poll 任务来执行，当发现没有时间的时候就不会再继续执行剩下的任务。ioRatio 默认是 50%，也就是事件处理和任务执行占用大概相同的时间。
+- 如果在 run 方法的循环中一开始没有任务，则会进入 select 循环，执行 `selector.select(timeoutMillis)`阻塞式的获取多路 IO 事件，其中超时时间 `timeoutMillis` 默认是 1s。如果一直阻塞到超时，那么会判断一些条件（当前是否被唤醒、是否有任务等）以决定是否跳出 select 循环向下执行，否则继续执行`selector.select(timeoutMillis)`。如果在阻塞过程中触发了 IO 事件或者 selector 被唤醒，则 `selector.select(timeoutMillis)`会返回然后直接跳出 select 循环向下执行`this.processSelectedKeys()`和`this.runAllTasks(ioTime * (long)(100 - ioRatio) / (long)ioRatio)`。
