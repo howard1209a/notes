@@ -85,8 +85,8 @@ log.debug("结果是:{}", result);
 - NEW：只是 new 了 Thread 对象，还没有调用 start() 方法，线程没有注册到 JVM
 - RUNNABLE：调用了 start() 方法之后，在 JVM 层面创建一个线程，初始化线程栈等资源，线程状态从 NEW 切换到 RUNNABLE，映射操作系统内核实际线程，切换到就绪态。注意 JVM 层面的 RUNNABLE 状态涵盖了操作系统层面的就绪状态和运行状态。
 - BLOCKED：synchronized 没有抢到锁时线程会进入的阻塞态
-- WAITING：wait()、await()、LockSupport.park()调用时会进入的阻塞态，其中 await()、LockSupport.park()底层走的都是 UNSAFE.park()
-- TIMED_WAITING：Threap.sleep()调用时会进入的阻塞态
+- WAITING：wait()、join()、await()、LockSupport.park()调用时会进入的阻塞态，其中 await()、LockSupport.park()底层走的都是 UNSAFE.park()，join()底层是 wait()
+- TIMED_WAITING：Threap.sleep()和 wait(n)调用时会进入的阻塞态
 
 ## Monitor 管程
 
@@ -200,3 +200,256 @@ Lock Record 对象，每个线程的每个栈帧都会包含一个锁记录的�
 
 下图是执行结果
 ![](https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240112234538.png)
+
+#### 批量重偏向
+
+当前有一些偏向锁偏向 A 线程，B 线程尝试获取这些锁导致多线程非争用地共享锁，偏向锁升级成轻量级锁，当升级次数超过一定阈值的时候，JVM 会将剩余的偏向锁批量地重偏向给 B 线程。
+
+#### 批量撤销偏向
+
+当升级次数超过更高阈值的时候，JVM 会觉得根本不该偏向，因此会让该类的所有对象都不可偏向，即最低就是轻量级锁。
+
+#### 重量级锁的六个过程
+
+##### 上锁
+
+将 Monitor 的 Owner 置为当前线程，继续执行
+
+##### 上锁但锁已被占用
+
+发现 Owner 非空，将当前线程加入 EntryList，状态从 RUNNABLE 变为 BLOCKED，阻塞
+
+##### 释放锁
+
+将当前线程从 Owner 删掉，按照某种算法从 EntryList 中选出一个线程放入 Owner，状态从 BLOCKED 置为 RUNNABLE，继续执行
+
+##### wait
+
+将当前线程放入 WaitSet，状态从 RUNNABLE 变成 WAITING，然后执行释放锁流程，都执行完后当前线程阻塞
+
+##### notify/notifyAll
+
+从 WaitSet 拿出一个线程（notify）或拿出全部线程（notifyAll）放入 EntryList，状态从 WAITING 转为 BLOCKED，继续执行
+
+##### interrupt
+
+如果一个线程正处于 WAITING 状态，打断它等同于从 WaitSet 拿出它并放入 EntryList，状态从 WAITING 转为 BLOCKED，抢到锁后直接抛出 InterruptedException 异常
+
+#### join 原理
+
+判断目标线程是否 alive，不断地 wait 当前线程
+
+## park 和 unpark 原理
+
+`LockSupport.park()`和`LockSupport.unpark()`底层实现依赖 native 的`UNSAFE.park`和`UNSAFE.unpark`。
+
+每个线程都有自己的一个 Parker 对象，由三部分组成 `_counter`，`_cond`和`_mutex`，其中`_counter`为 0 代表耗尽，1 代表充足。
+
+### park
+
+如果当前`_counter`为 0，阻塞当前线程，状态从 RANNBLE 变为 WAITING
+
+如果当前`_counter`为 1，将其置为 0，继续运行不会阻塞
+
+### unpark
+
+如果此时线程被 park 阻塞了，则唤醒线程，状态从 WAITING 变为 RUNNABLE
+
+如果此时线程正在运行，则将线程的`_counter`置为 1
+
+### 对比 wait & notify
+
+wait，notify 和 notifyAll 必须配合 Object Monitor 一起使用，而 park，unpark 不必
+
+park & unpark 是以线程为单位来【阻塞】和【唤醒】线程，而 notify 只能随机唤醒一个等待线程，notifyAll 是唤醒所有等待线程，就不那么【精确】
+
+park & unpark 可以先 unpark，而 wait & notify 不能先 notify
+
+## 死锁、活锁和饥饿
+
+在设计锁的粒度时，要尽可能地细粒度以提高程序的并发度，但是需要注意死锁等问题。
+
+### 死锁
+
+多个线程因互相等待资源而共同陷入阻塞的情况
+
+检测死锁可以使用 jconsole 工具，或者使用 jps 定位进程 id，再用 jstack 定位死锁
+
+### 活锁
+
+多个线程互相改变对方的结束条件，导致虽然大家都在运行，没有阻塞，但是都不能结束的情况
+
+### 饥饿
+
+线程因为某种原因一直得不到运行的情况
+
+## ReentrantLock
+
+相对于 synchronized ，ReentrantLock 阻塞式获取锁的过程具备如下特点：
+
+- 可打断
+- 可以设置超时时间
+- 可以设置为公平锁
+- 支持多个条件变量
+
+synchronized 阻塞式获取锁的过程状态是 BLOCKED，不可打断，不可超时退出，非公平锁，只有一个 WaitSet 因此只支持一个条件变量。
+
+与 synchronized 一样，都支持可重入
+
+### 基本语法
+
+#### 最常见使用
+
+```java
+ReentrantLock lock = new ReentrantLock();
+lock.lock();
+try {
+
+} finally {
+    lock.unlock();
+}
+```
+
+#### 可打断
+
+```java
+ReentrantLock lock = new ReentrantLock();
+try {
+    lock.lockInterruptibly();
+} catch (InterruptedException e) {
+    throw new RuntimeException(e);
+}
+```
+
+#### 非阻塞式获取锁
+
+```java
+ReentrantLock lock = new ReentrantLock();
+lock.tryLock();
+```
+
+#### 可打断可超时退出
+
+```java
+ReentrantLock lock = new ReentrantLock();
+try {
+    if (!lock.tryLock(1, TimeUnit.SECONDS)) {
+        return;
+    }
+} catch (InterruptedException e) {
+    return;
+}
+try {
+
+} finally {
+    lock.unlock();
+}
+```
+
+#### 公平锁
+
+ReentrantLock 默认是非公平锁，公平锁需要在构造时指定
+
+```java
+ReentrantLock lock = new ReentrantLock(true);
+```
+
+#### 条件变量
+
+synchronized 只支持一个条件变量 WaitSet，ReentrantLock 可以创建多个条件变量，除此之外两者几乎相同。
+
+await 的线程可以被唤醒（signal、signalAll）、被打断（interrupt）、超时（如果 await 设置了时间），重新竞争 lock 锁。
+
+```java
+ReentrantLock lock = new ReentrantLock();
+Condition condition = lock.newCondition();
+condition.await();
+condition.signal();
+condition.signalAll();
+```
+
+## 共享模型之内存
+
+### JMM
+
+JMM 即 Java Memory Model，它定义了主存、工作内存抽象概念，底层对应着 CPU 寄存器、Cache 缓存和硬件内存。
+
+### 一个错误的例子
+
+![](https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240113141002.png)
+
+因为 t 线程要频繁从主内存中读取 run 的值，JIT 编译器会将 run 的值缓存至自己工作内存中的高速缓存中， 减少对主存中 run 的访问，提高效率。1 秒之后，main 线程修改了 run 的值，并同步至主存，而 t 是从自己工作内存中的高速缓存中读取这个变量 的值，结果永远是旧值。
+
+### volatile
+
+#### 可见性
+
+volatile 可以用来修饰属性或静态属性，volatile 修饰的变量在任意线程的读写都将直接针对主存，可以说某个变量如果被多线程共享一般都会设置为 volatile 的，以保证可见性和有序性。
+
+这里其实和 CPU 缓存比较像，CPU 的 L1、L2Cache 中会缓存内存中的内存块，如果一个变量只有单个 CPU 访问，那么写回、写直达等策略就可以保证缓存一致性，但是如果一个变量被多个 CPU 访问，会使用总线嗅探来解决多核间的缓存一致性。但是 Java 内存模型没有总线嗅探功能，只能强制所有线程直接读写主存来保证可见性。
+
+volatile 本身不能保证原子性，但上述例子中对静态属性 run 的读写本身是原子性的，因为读写都是单条字节码，如下图所示。
+![](https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240113143347.png)
+
+#### 有序性
+
+指令重排：JVM 会在不影响单线程执行正确性的前提下，调整语句的执行顺序，目的是提高 cpu 流水线技术的工作效率。但是多线程下『指令重排』会影响正确性。
+
+#### happens-before 原则
+
+happens-before 原则规定了对共享变量的写操作对其它线程的读操作可见，除了 happens-before 原则之外的其他情况，JMM 并不能保证一个线程对共享变量的写，对于其它线程对该共享变量的读可见
+
+#### 读写屏障
+
+volatile 是通过读写屏障机制保证的可见性和有序性，对 volatile 变量的写指令后会加入写屏障，对 volatile 变量的读指令前会加入读屏障。
+
+- 写屏障：同步工作内存到主存，并保证不会将写屏障之前的代码排在写屏障之后
+- 读屏障：清空工作内存，并保证不会将读屏障之后的代码排在读屏障之前
+
+## 共享模型之无锁
+
+### CAS
+
+CAS 全称 compareAndSet，compareAndSet 操作的执行过程是先比较，如果相等就 set 返回成功，不相等就返回失败，compareAndSet 操作本身是原子的，并且它的原子性来自于 CPU 指令级别的保证，CAS 的底层是 `lock cmpxchg` 指令(X86 架构)，在单核时单条机器指令自然是原子的，在多核时，`lock cmpxchg` 指令会锁住总线保证只有自己在执行。
+
+### CAS 和 synchronized 对比
+
+- CAS：CAS 是乐观锁，体现的是无锁并发、无阻塞并发，线程不会陷入阻塞，这是效率提升的因素之一，但如果竞争激烈，可以想到重试必然频繁发生，反而效率会受影响
+- synchronized：悲观锁，线程会阻塞，线程上下文切换会带来较大资源开销
+
+### JUC 包提供的 Atomic 实现
+
+- 原子数值：提供对数值的 CAS 操作
+  - AtomicBoolean
+  - AtomicInteger
+  - AtomicLong
+- 原子引用：提供对引用对象的 CAS 操作，这里的 compare 对比的是两个对象是否==
+  - AtomicReference
+- 原子数组：提供对数组中的数值或引用的 CAS 操作
+  - AtomicIntegerArray
+  - AtomicLongArray
+  - AtomicReferenceArray
+- 字段更新器：利用字段更新器，可以针对对象的某个域(Field)进行原子操作，只能配合 volatile 修饰的字段使用，否则会出现异常。适用场景：有一个类，类里面有一个属性，属性并不是 Atomic 的，现在有一个此类的对象，我希望 CAS 原子地操作这个对象的属性。
+  - AtomicReferenceFieldUpdater
+  - AtomicIntegerFieldUpdater
+  - AtomicLongFieldUpdater
+
+### Unsafe
+
+JUC 包提供的 Atomic 实现全部都是依靠 Unsafe 的 native 方法实现的。Unsafe 类是单例的， 它提供了非常底层的，操作内存、线程的方法，Unsafe 对象不能直接调用，只能通过反射获得。
+
+## 共享模型之不可变
+
+不可变类就是不能够修改内部属性
+
+- 将类和类中所有属性都设置为 final 的，那么这个类的对象一定是不可变的
+- 没有属性的类一定是不可变的
+
+## 共享模型之工具
+
+### 线程池
+
+Java 线程池采用了常见的一种接口设计方式
+![](https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240113165911.png)
+
+具体线程池知识详见并发编程 pdf 的 P146
