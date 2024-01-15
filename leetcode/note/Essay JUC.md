@@ -294,7 +294,9 @@ park & unpark 可以先 unpark，而 wait & notify 不能先 notify
 
 synchronized 阻塞式获取锁的过程状态是 BLOCKED，不可打断，不可超时退出，非公平锁，只有一个 WaitSet 因此只支持一个条件变量。
 
-与 synchronized 一样，都支持可重入
+ReentrantLock 和 synchronized 一样，都是可重入锁
+
+synchronized 是在 JVM 的 C++层面实现的，ReentrantLock 是借助 unsafe 提供的 CAS 接口和 LockSupport 提供的阻塞接口在 Java 层面实现的。
 
 ### 基本语法
 
@@ -452,4 +454,83 @@ JUC 包提供的 Atomic 实现全部都是依靠 Unsafe 的 native 方法实现�
 Java 线程池采用了常见的一种接口设计方式
 ![](https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240113165911.png)
 
+线程池由一些运行着的线程和一个阻塞队列组成，阻塞队列支持多线程并发放入任务和取出任务。当向线程池提交任务时，如果当前线程数没有达到核心线程数，那么创建新的线程并执行任务，如果当前线程数达到了核心线程数，那么放入阻塞队列，如果阻塞队列满了，那么尝试创建临时线程（临时线程长时间没有执行任务会关闭），如果临时线程数也满了，那么提交失败（这里有多种处理方式）。
+
 具体线程池知识详见并发编程 pdf 的 P146
+
+### Fork/Join
+
+Fork/Join 是 JDK 1.7 加入的新的线程池实现，它体现的是一种分治思想，适用于能够进行任务拆分的 cpu 密集型运算
+
+所谓的任务拆分，是将一个大任务拆分为算法上相同的小任务，直至不能拆分可以直接求解。跟递归相关的一些计算，如归并排序、斐波那契数列、都可以用分治思想进行求解
+
+Fork/Join 在分治的基础上加入了多线程，可以把每个任务的分解和合并交给不同的线程来完成，进一步提升了运算效率
+
+Fork/Join 默认会创建与 cpu 核心数大小相同的线程池
+
+## AQS
+
+AQS 全称是 AbstractQueuedSynchronizer，是阻塞式锁和相关的同步器工具的框架
+
+特点:
+
+- 用 state 属性来表示资源的状态
+- 提供了一个双向链表用于放置阻塞线程，类似于 Monitor 的 EntryList
+- 提供了条件变量来实现等待、唤醒机制，支持多个条件变量，类似于 Monitor 的 WaitSet
+
+AQS 要实现的功能目标：
+
+- tryAcquire（自己实现）：非阻塞式获取锁
+- acquire：阻塞式获取锁
+- acquireInterruptibly：阻塞式获取锁，可打断
+- tryAcquireNanos：阻塞式获取锁，可打断、可超时
+- release：原子释放锁，需要自己实现 tryRelease
+
+![](https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240115162236.png)
+
+## ReentrantLock 原理
+
+### 非公平锁 NonfairSync 实现原理
+
+ReentrantLock 中的 NonfairSync 静态内部类就是 AQS 类的子类，借助 AQS 实现了一个非公平的可重入锁。
+
+非公平性体现在`tryRelease()`中直接`setState(0)`，之后再去`unparkSuccessor`唤醒双向链表中的第一个线程，在此之间如果有新的线程尝试 CAS 获取锁将会成功。
+
+可重入性体现在非阻塞式获取锁方法`nonfairTryAcquire()`中如果发现上锁的是当前线程的话就会加锁重入的计数。原子释放锁方法`tryRelease`中会减锁重入的计数。
+
+### 公平锁 FairSync 实现原理
+
+是一个公平的可重入锁。与非公平锁实现的区别仅仅在于非阻塞式获取锁方法`tryAcquire`中不会直接 CAS，而是查看双向链表中没有线程等待的时候才会去 CAS。
+
+## ReentrantReadWriteLock 读写锁
+
+ReentrantReadWriteLock 支持读读并发、读写、写写互斥，适合读多写少的情况。
+
+ReentrantReadWriteLock 不支持条件变量，支持重入时锁降级，即一个线程在获取到写锁的情况下，可以继续获取到读锁。
+
+## Semaphore
+
+信号量，用来限制能同时访问共享资源的线程上限。
+
+### 实现原理
+
+Semaphore 中也定义了一个 NonfairSync，借助 AQS 实现了一个限制共享资源访问的信号量机制。
+
+核心在于`tryAcquireShared`实现了非阻塞式多线程并发获取共享资源权限。
+
+## CountdownLatch
+
+用来进行线程同步协作，等待所有线程完成倒计时。 其中构造参数用来初始化等待计数值，`await()` 用来等待计数归零，`countDown()` 用来让计数减一
+
+## 缓存一致性
+
+考虑一个简单的二级缓存
+
+- 读操作：缓存命中就直接返回，未命中就读数据库，存入缓存然后返回
+- 写操作：先清缓存再更新数据库，或者先更新数据库再清缓存
+
+如果我们为了提高速度而牺牲一些一致性，那么就可以读写操作不上锁，这时候读操作的顺序肯定是一定的，但写操作选择先更新数据库再清缓存更好。
+
+- 先清缓存再更新数据库：容易出现缓存清除后被重建导致后续缓存和数据库中数据永久不一致的情况。
+- 先更新数据库再清缓存：更新数据库后，缓存无论如何变化，在后续清除缓存时，缓存和数据库都是一致的，虽然在后续清除缓存前，数据可能会有短暂的不一致情况。这种方式也可能带来数据永久不一致的情况，但是出现的几率非常小，如下图。
+  ![](https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240115203733.png)
