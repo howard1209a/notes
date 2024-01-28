@@ -18,6 +18,8 @@ tags: [Leetcode总结]
 
 数组下标含义（有的题可能需要稍微变化）：先偷当前这家，当前这家之后的家随便偷，所获的最大收益。
 
+另一种下标含义的定义方式是：偷当前这家，之后所有家都不偷，之前所有家在不触发警报的情况下随便偷。
+
 力扣题目链接：[https://leetcode.cn/problems/house-robber/](https://leetcode.cn/problems/house-robber/)
 
 力扣题目链接：[https://leetcode.cn/problems/house-robber-ii/](https://leetcode.cn/problems/house-robber-ii/)
