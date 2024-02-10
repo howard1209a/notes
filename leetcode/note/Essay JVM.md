@@ -282,6 +282,8 @@ JDK9 及之后的默认垃圾回收器。性能要高于其他垃圾回收器。
 
 ### 内存调优
 
+观察程序的堆内存曲线，如果正常就不需要进行内存调优，如果异常比如发现了存在大量不可回收对象或存在内存泄露或出现内存突然飙高乃至溢出的现象，这时就需要进行内存调优，找到大量不可回收对象是什么、哪里出现的内存泄露、内存溢出是什么原因（是持续性的内存泄露导致的，还是内存峰值过高导致的，如果是内存峰值过高导致的，要么分配更多的堆内存、要么修改代码降低内存峰值）
+
 堆内存泄漏：某个对象不再使用却仍然引用它，该对象依然在 GC ROOT 的引用链上
 
 #### 一些可能引起内存溢出的原因
@@ -338,3 +340,68 @@ MAT 就是遍历支配树，如果发现某节点深堆的大小超过整个堆�
   2. 高峰期直接限流保护
 - 某并发处理大量数据的程序 OOM，问题根源是线程每次读入内存的数据量过大，导致内存峰值过大
   1. 减少单批读入内存的数据量大小
+
+### GC 调优
+
+观察程序的 GC 吞吐量和 GC STW 值，如果 GC 吞吐量较高、STW 很低，那么就不需要进行 GC 调优，如果出现了 GC 吞吐量低、STW 较高的情况，那么就需要进行 GC 调优，首先如果出现了频繁 FULLGC，那么是由于内存过高导致的，这时又回到了内存调优，如果不存在频繁 FULLGC 现象，我们可以选择合适的垃圾回收器、设置合适的 JVM 参数来提高 GC 效率。
+
+#### 发现 GC 问题
+
+通过 GC 日志，可以得到每次 GC 的详细信息，比如本次 GC 使用什么垃圾回收器、是 MinorGC 还是 FullGC、回收了多少内存、耗时多久等等。
+
+- 使用方法(JDK 8 及以下):`-XX:+PrintGCDetails -Xloggc:文件名`
+- 使用方法(JDK 9+):`-Xlog:gc\*:file=文件名`
+
+我们可以用 GCeasy 来分析 GC 日志，网址是`https://gceasy.io/`
+
+![](https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240210154617.png)
+
+![](https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240210154734.png)
+
+![](https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240210154816.png)
+
+![](https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240210160447.png)
+
+![](https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240210160625.png)
+
+#### 解决 GC 问题的手段
+
+##### 优化基础 JVM 参数
+
+![](https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240210161146.png)
+
+-Xmx 和 –Xms 一般设置成相等的值
+
+![](https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240210161529.png)
+
+![](https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240210161607.png)
+
+![](https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240210163225.png)
+
+其余 JVM 参数如年轻代大小、伊甸园区和幸存者区内存比例等不建议自己设置
+
+##### 更换垃圾回收器
+
+根据业务类型和垃圾回收器特性设置即可
+
+### 性能调优
+
+性能调优适用于，在不需要进行内存调优和 GC 调优时，发现程序导致 cpu 飙高或某个接口响应时间过长或出现死锁，这时可以进行性能调优。
+
+#### cpu 飙高问题
+
+利用`top`命令定位哪个进程的哪个线程存在很高的 cpu 占用率，使用`jstack 进程ID > 文件名`命令进行 Thread Dump 线程转储（打一份线程当前状态的快照）。然后查看下 cpu 飙高线程当前的方法栈。
+
+#### 死锁问题
+
+通过`jstack -l 进程ID > 文件名`命令进行线程 dump，然后在文件中搜索 deadlock 即可找到死锁位置。
+
+#### 接口响应时间很长问题
+
+我们需要定位接口中的哪一部分代码导致的性能问题，可以借助 Arthas 的 trace 命令。
+
+![](https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240210184244.png)
+
+#### 如何测试一个方法的耗时
+
+由于存在懒加载对象，所以第一次方法调用的时间有可能很长，由于多次执行方法 JIT 会进行优化，因此经过充分预热后的测试才是准确的。因此我们一般使用 JMH 框架进行预热后的测试。
