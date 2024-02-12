@@ -405,3 +405,152 @@ MAT 就是遍历支配树，如果发现某节点深堆的大小超过整个堆�
 #### 如何测试一个方法的耗时
 
 由于存在懒加载对象，所以第一次方法调用的时间有可能很长，由于多次执行方法 JIT 会进行优化，因此经过充分预热后的测试才是准确的。因此我们一般使用 JMH 框架进行预热后的测试。
+
+## JVM 扩展知识
+
+### GraalVM
+
+GraalVM 是 Oracle 官方推出的一款高性能 JDK，核心优势是可以编译成可执行文件（失去跨平台特性），具有更快的启动速度、更低的内存和 cpu 使用率。
+
+### 新一代的 GC
+
+#### Shenandoah
+
+Shenandoah 是由 Red Hat 开发的一款低延迟的垃圾回收器，无论堆大小如何，Shenandoah 都能通过多次回收的方式将 STW 尽量控制在 10ms 以下。
+
+Shenandoah 不是 oraclejdk 的可选垃圾回收器，它只存在于 openjdk 中。
+
+#### ZGC
+
+ZGC 是 oracle 开发的低延迟垃圾回收器，将 STW 尽量控制在了 1ms 以下，ZGC 吞吐量不佳，且垃圾回收会占用大量额外堆内存，OracleJDK 和 OpenJDK 中都支持 ZGC。
+
+### Java Agent
+
+Java Agent 技术是 JDK 提供的用来编写 Java 工具的技术，使用这种技术生成一种特殊的 jar 包，这种 jar 包可以让 Java 程序静态或动态地运行其中的代码。
+
+#### 静态加载模式
+
+`java`命令运行时就指定好 Java Agent 的 jar 包，主线程会在执行 main 方法前先执行 premain 方法
+
+![](https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240211181717.png)
+
+#### 动态加载模式
+
+首先开启被加载的 java 进程，然后打开另一个 java 进程，给这个 java 进程输入被加载的 java 进程的进程号和 Java Agent 的 jar 包路径，这样这两个 java 进程可以通信，被加载的 java 进程也就能拿到 jar 包中的字节码，它会开一个新的线程来运行这段字节码。
+
+![](https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240211182146.png)
+
+#### 字节码增强技术
+
+静态加载模式是在主线程 main 方法之前执行一段代码，动态加载模式是随时单开一个线程执行一段代码。
+
+借助 ASM 或 Byte Buddy 这两个字节码增强技术框架，我们可以修改加载到 JVM 内存中的字节码，比如在字节码指令序列的开头统计当前时间，在字节码指令序列的结尾统计当前时间然后相减得到该方法的执行时间。ASM 框架比较难用，Byte Buddy 框架基于 ASM 框架开发，要好用一些。
+
+![](https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240211185740.png)
+
+![](https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240211185805.png)
+
+## JVM 底层原理
+
+### 栈上的数据存储
+
+![](https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240212104643.png)
+
+![](https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240212113147.png)
+
+![](https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240212113301.png)
+
+无论是 32 位还是 64 位虚拟机，对于任意数值类型来说，栈内存字节数一定大于等于堆内存字节数。比如在 32 位虚拟机中 double 堆内存 8 字节、栈内存 8 字节，在 64 位虚拟机中 double 堆内存 8 字节、栈内存 16 字节。
+
+栈内存比堆内存大是存在空间浪费的，这是一种空间换时间的方案，在栈中不区分数值类型直接按槽 slot 进行计算，省去了根据不同数值类型进行不同计算方式的过程。
+
+堆中数据保存到栈上，无符号高位补 0 有符号高位补 0 或 1，栈中数据保存到堆上，超出部分舍弃即可。
+
+### 对象在堆上是如何存储的
+
+![](https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240212122153.png)
+
+其中 Klass Word(Klass pointer)指向方法区栈信息中 InstanceKlass 对象的地址，32 位虚拟机中 Mark Word 和 Klass Word 都占 4 字节，64 位虚拟机中 Mark Word 和 Klass Word 都占 8 字节
+
+![](https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240212115608.png)
+
+#### 指针压缩
+
+![](https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240212115816.png)
+
+![](https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240212120119.png)
+
+指针压缩虽然可以降低对象占用内存，但也有两个问题，第一是要求所有对象占用堆内存的大小是 8 字节的倍数（内存对齐），第二是寻址范围变小，不用压缩指针，应该是 2 的 64 次方 = 16EB，用了压缩指针就变成了 8(字节) = 2 的 3 次方 \* 2 的 32 次方 = 2 的 35 次方
+
+#### 内存对齐
+
+内存对齐主要目的是为了解决并发情况下 CPU 缓存失效的问题，一个 cpu 缓存内存块大小是 8 字节，要求所有对象占用堆内存的大小是 8 字节倍数的情况下，使得每个对象完整的占满整数个 cpu 缓存内存块，这样某个对象 cpu 缓存失效并不会导致其他对象 cpu 缓存失效。
+
+##### 字段重排列
+
+![](https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240212121819.png)
+
+![](https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240212121843.png)
+
+### 方法调用的原理
+
+方法调用的本质是在栈上创建栈帧，然后程序计数器指向方法中的第一行字节码指令。以 invoke 开头的字节码指令的作用是执行方法的调用。
+
+![](https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240212123003.png)
+
+#### 静态绑定
+
+![](https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240212122542.png)
+
+#### 动态绑定
+
+![](https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240212122827.png)
+
+![](https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240212122845.png)
+
+![](https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240212122902.png)
+
+### 异常捕获的原理
+
+#### try-catch 实现
+
+编译时字节码中生成的异常表在类加载后会存储到方法区的类信息中，包含了异常捕获的生效范围以及异常发生后跳转到的字节码指令位置。
+
+![](https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240212125203.png)
+
+程序运行中触发异常时，Java 虚拟机会从上至下遍历异常表中的所有条目。当触发异常的字节码的索引值在某个异常表条目的监控范围内，Java 虚拟机会判断所抛出的异常和该条目想要捕获的异常是否匹配。
+
+1. 如果匹配，跳转到“跳转 PC”对应的字节码位置。
+2. 如果遍历完都不能匹配，说明异常无法在当前方法执行时被捕获，此方法栈帧直接弹出，在上一层的栈帧中进行异常捕获的查询。
+
+#### finally 实现
+
+finally 中的字节码指令会插入到 try 和 catch 代码块中，保证在 try 和 catch 执行之后一定会执行 finally 中的代码。如下图所示，其中`iconst_3 istore1`这两条指令在三个位置出现了，这样就保证了没有抛异常、抛异常但捕获、抛异常但未捕获三种情况都会执行 finally 中的代码。
+
+![](https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240212131857.png)
+
+### JIT 即时编译器
+
+执行一条字节码指令的时候，首先解释器会进行语法分析，然后根据结果进行对应的操作，这个逻辑是在 C++层面实现的，但是 JVM 本质是一个可执行文件，因此运行的还是机器码。JIT 会对一些热点方法的字节码进行优化，直接将其编译成机器码同时进行一些效率优化，之后执行这段字节码时就不再解释执行而是直接执行机器码，相比于解释执行更快的原因在于：
+
+1. 这段机器码不是 C++逻辑编译生成的，而是字节码直接编译生成的
+2. 进行了一些优化
+3. 省去了语法解析的过程
+
+#### JIT 即时编译器种类
+
+在 HotSpot 中，有三款即时编译器，C1、C2 和 Graal，其中 Graal 在 GraalVM 章节中已经介绍过。 C1 编译效率比 C2 快，但是优化效果不如 C2。
+
+C1 即时编译器和 C2 即时编译器都有独立的线程去进行处理，内部会保存一个队列，队列中存放需要编译的任务。一般即时编译器是针对方法级别来进行优化的，当然也有对循环进行优化的设计。
+
+#### 常见的 JIT 即时编译器优化手段
+
+##### 方法内联
+
+方法体中的字节码指令直接复制到调用方的字节码指令中，节省了创建栈帧的开销。
+
+##### 逃逸分析
+
+如果方法中的对象不会逃逸（不会调别的方法把这个对象传进去，也不会将这个对象 return 出去），那么该对象可以直接在栈上分配内存，不用分配堆内存。下面是一个例子
+
+![](https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240212134513.png)
