@@ -1,10 +1,10 @@
 ---
-title: 什么是dll文件、lib文件、def文件
+title: 什么是dll文件、lib文件
 date: 2023-10-29 13:19:49
 tags: [日常笔记]
 ---
 
-# 什么是 dll 文件、lib 文件、def 文件
+# 什么是 dll 文件、lib 文件
 
 **DLL（Dynamic Link Library，动态链接库）**，在 Windows 系统中，许多应用程序并不是一个完整的可执行文件，它们被分割成一些相对独立的动态链接库，也就是 DLL 文件，放置于系统中。当我们执行某一个程序时，相应的 DLL 文件就会被调用。一个应用程序可有多个 DLL 文件，一个 DLL 文件也可能被几个应用程序所共用，这样的 DLL 文件被称为共享 DLL 文件。**DLL 文件一般被存放在 C:\Windows\System 目录下。**
 
