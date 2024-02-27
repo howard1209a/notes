@@ -17,3 +17,17 @@ tags: [日常笔记]
    ![](https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240226232751.png)
    ![](https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240226232919.png)
 7. 复制题号可以在 vscode 上找到对应的题
+
+## 如何刷题
+
+### 刷新题
+
+中等+正确率 65%以下+评论数 100 以上，才需要刷
+
+### 刷旧题
+
+做过的题如果再次做，没有思路或者写起来不顺畅，可以添加到错题本中
+
+### 刷错题本
+
+需要定期不断地刷，才能记牢，建议一周复习一次
