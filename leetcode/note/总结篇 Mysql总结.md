@@ -488,3 +488,87 @@ redo log 是物理日志，记录了某个数据页做了什么修改，比如�
 #### redo log 要写到磁盘，数据也要写磁盘，为什么要多此一举？
 
 写入 redo log 的方式使用了追加操作， 所以磁盘操作是顺序写，而写入数据需要先找到写入位置，然后才写到磁盘，所以磁盘操作是随机写。磁盘的「顺序写 」比「随机写」 高效的多。
+
+#### redo log 刷盘
+
+redo log 在刚产生时会存放于 redo log buffer 内存缓存中，一般会在每隔一秒以及事务提交时刷入磁盘。
+
+#### redo log 文件写满了怎么办
+
+一共有两个 redo log 文件，它们构成一个环形以循环写的方式工作，write pos 表示 redo log 当前记录写到的位置，用 checkpoint 表示当前要擦除的位置，如果 buffer pool 中的脏页已经刷新到了磁盘，那么脏页对应的 redo log 就可以擦除。
+
+如果 write pos 追上了 checkpoint，就意味着 redo log 文件满了，此时 Mysql 会阻塞并将 buffer pool 中的脏页不断刷新到磁盘，然后擦除相应的 redo log。
+
+![](https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240321091950.png)
+
+### binlog
+
+MySQL 在完成一条增删改操作后，Server 层还会生成一条 binlog，等之后事务提交的时候，会将该事务执行过程中产生的所有 binlog 统一写入 binlog 文件。binlog 文件是记录了所有数据库表结构变更和表数据修改的日志，不会记录查询类的操作。
+
+#### binlog 的 3 种格式类型
+
+- STATEMENT：每一条增删改的 SQL 都会被记录到 binlog 中，相当于记录了所有的逻辑操作，主从复制中 slave 端再根据 SQL 语句重现。但如果用了 uuid 或者 now 这些函数，则主库从库执行的结果不一致。
+- ROW：记录每行数据的变化结果，不会出现 STATEMENT 下动态函数的问题，缺点是文件比较大。
+- MIXED：包含了 STATEMENT 和 ROW 模式，它会根据不同的情况自动使用 ROW 模式和 STATEMENT 模式。
+
+#### binlog 和 redo log 的不同点
+
+binlog 在 server 层实现，redo log 在 innodb 存储引擎实现。binlog 用来做备份和主从复制，redo log 用来做 buffer pool 脏数据页恢复。binlog 是追加写，写满一个文件就创建一个新的文件继续写，不会覆盖以前的日志，保存的是全量的日志。
+redo log 是循环写，日志空间大小是固定。
+
+#### 主从复制
+
+主从复制过程如下图，可以看到无论是主库的 binlog 日志发送还是从库的中继日志回放都是异步过程。
+
+![](https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240321095420.png)
+
+有了主从复制机制，主库从库之间就存在了延迟数据同步。客户端可以在写数据时只写主库，在读数据时只读从库，这样每台数据库的压力会变小，并且即使写请求会锁表或者锁记录，也不会影响读请求的执行。但缺点是延迟问题和单点问题（一旦主库宕机就会出现数据丢失）。
+
+##### 主从复制的其他模型
+
+- 同步复制：性能很低、可用性很差
+- 异步复制：单点问题
+- 半同步复制：只要一部分从库返回复制成功的响应，就成功提交事务，保证即使出现主库宕机，至少还有一个从库有最新的数据，不存在数据丢失的风险。
+
+#### binlog 刷盘
+
+事务执行过程中，先把日志写到 binlog cache，事务提交的时候，再把 binlog cache 写到 binlog 文件中。每个线程有自己 binlog cache，但是最终都写到同一个 binlog 文件。
+
+### 一条 update 语句的执行过程
+
+```sql
+UPDATE t_user SET name = 'xiaolin' WHERE id = 1;
+```
+
+1. 优化器分析出成本最小的执行计划。
+2. 通过聚簇索引搜索 id = 1 这一行记录，如果 id=1 这一行所在的数据页不在 buffer pool 中，就将数据页从磁盘读入到 buffer pool。
+3. 唯一索引等值查询且数据存在，上 X 型记录锁。
+4. 开启事务，生成一条存放该行旧值的 undo log，undo log 会写入 Buffer Pool 中的 Undo 页面并将该页面标记为脏数据，生成一条用于恢复脏 undo 页的 redo log。
+5. 更新 buffer pool 中对应数据页并标记为脏页，生成一条用于恢复脏数据页的 redo log。脏页会通过 WAL 技术由后台线程选择一个合适的时机写入到磁盘。
+6. 记录该语句对应的 binlog，并保存到 binlog cache。
+7. 提交事务，释放锁，两阶段提交（binlog 刷入磁盘、redo log 刷入磁盘）。
+
+### 两阶段提交
+
+#### 为什么需要两阶段提交
+
+事务提交后，redo log 和 binlog 都要写入磁盘，但是这两个是独立的逻辑，可能出现半成功的状态，这样就造成两份日志之间的逻辑不一致。
+
+- 如果 redo log 写入磁盘后断电重启，binlog 没来得及写入：主库是新值，从库是旧值。
+- 如果 binlog 写入磁盘后断电重启，redo log 没来得及写入：从库是新值，主库是旧值。
+
+#### 两阶段提交过程
+
+![](https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240321104933.png)
+
+从图中可看出，事务的提交分为 prepare 和 commit 两个阶段：
+
+- prepare 阶段：设置 redo log 的 XID，设置 redo log 的事务状态为 prepare，将 redo log 写入磁盘。
+- commit 阶段：设置 binlog 的 XID，将 binlog 写入磁盘，最后调用引擎的提交事务接口，将磁盘中 redo log 状态设置为 commit。
+
+不管是时刻 A（redo log 已经写入磁盘， binlog 还没写入磁盘），还是时刻 B （redo log 和 binlog 都已经写入磁盘，还没写入 commit 标识）崩溃，此时的 redo log 都处于 prepare 状态。
+
+在 MySQL 重启后会按顺序扫描 redo log 文件，碰到处于 prepare 状态的 redo log，就拿着 redo log 中的 XID 去 binlog 查看是否存在此 XID：
+
+- 如果 binlog 中没有此 XID，说明 redo log 完成刷盘，但是 binlog 还没有刷盘，则回滚事务。
+- 如果 binlog 中有此 XID，说明 redolog 和 binlog 都已经完成了刷盘，则提交事务。
