@@ -1,0 +1,905 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/notes/img/fluid.png">
+  <link rel="icon" href="/notes/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="howard1209a">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="JVM 总结字节码文件详解Java 虚拟机的组成JVM 本质上是一个运行在计算机上的进程，它的主要职责是  解释运行：解释运行字节码中的指令 内存管理：为对象、方法等分配内存，自动进行垃圾回收 即时编译：对热点代码进行优化，提升执行效率  常见的 JVM 有很多实现，他们都遵循 Oracle 制定的 Java 虚拟机规范  字节码文件的组成字节码文件包含哪些信息字节码文件中保存了源代码编译之后的内">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JVM总结">
+<meta property="og:url" content="https://howard1209a.github.io/notes/2024/02/05/%E6%80%BB%E7%BB%93%E7%AF%87%20JVM%E6%80%BB%E7%BB%93/index.html">
+<meta property="og:site_name" content="笔记">
+<meta property="og:description" content="JVM 总结字节码文件详解Java 虚拟机的组成JVM 本质上是一个运行在计算机上的进程，它的主要职责是  解释运行：解释运行字节码中的指令 内存管理：为对象、方法等分配内存，自动进行垃圾回收 即时编译：对热点代码进行优化，提升执行效率  常见的 JVM 有很多实现，他们都遵循 Oracle 制定的 Java 虚拟机规范  字节码文件的组成字节码文件包含哪些信息字节码文件中保存了源代码编译之后的内">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240205193708.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240205191944.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240205193307.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240205195048.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240205201612.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240206112214.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240206192912.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240207145226.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240207172743.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240207181056.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240207183700.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240207184741.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240207190638.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240207190753.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240207191944.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240208160227.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240208164715.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240208162855.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240208163333.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240210154617.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240210154734.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240210154816.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240210160447.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240210160625.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240210161146.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240210161529.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240210161607.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240210163225.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240210184244.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240211181717.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240211182146.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240211185740.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240211185805.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240212104643.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240212113147.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240212113301.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240212122153.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240212115608.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240212115816.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240212120119.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240212121819.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240212121843.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240212123003.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240212122542.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240212122827.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240212122845.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240212122902.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240212125203.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240212131857.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240212134513.png">
+<meta property="article:published_time" content="2024-02-05T09:34:24.000Z">
+<meta property="article:modified_time" content="2024-03-28T08:09:47.438Z">
+<meta property="article:author" content="howard1209a">
+<meta property="article:tag" content="八股文">
+<meta property="article:tag" content="Java">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240205193708.png">
+  
+  
+  
+  <title>JVM总结 - 笔记</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/notes/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/notes/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/notes/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"howard1209a.github.io","root":"/notes/","version":"1.9.5","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/notes/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/notes/js/utils.js" ></script>
+  <script  src="/notes/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/notes/">
+      <strong>howard1209a</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/notes/">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/notes/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/notes/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/notes/about/">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/notes/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="JVM总结"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2024-02-05 17:34" pubdate>
+          2024年2月5日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          8.8k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          74 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">JVM总结</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="JVM-总结"><a href="#JVM-总结" class="headerlink" title="JVM 总结"></a>JVM 总结</h1><h2 id="字节码文件详解"><a href="#字节码文件详解" class="headerlink" title="字节码文件详解"></a>字节码文件详解</h2><h3 id="Java-虚拟机的组成"><a href="#Java-虚拟机的组成" class="headerlink" title="Java 虚拟机的组成"></a>Java 虚拟机的组成</h3><p>JVM 本质上是一个运行在计算机上的进程，它的主要职责是</p>
+<ul>
+<li>解释运行：解释运行字节码中的指令</li>
+<li>内存管理：为对象、方法等分配内存，自动进行垃圾回收</li>
+<li>即时编译：对热点代码进行优化，提升执行效率</li>
+</ul>
+<p>常见的 JVM 有很多实现，他们都遵循 Oracle 制定的 Java 虚拟机规范</p>
+<p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240205193708.png" srcset="/notes/img/loading.gif" lazyload></p>
+<h3 id="字节码文件的组成"><a href="#字节码文件的组成" class="headerlink" title="字节码文件的组成"></a>字节码文件的组成</h3><h4 id="字节码文件包含哪些信息"><a href="#字节码文件包含哪些信息" class="headerlink" title="字节码文件包含哪些信息"></a>字节码文件包含哪些信息</h4><p>字节码文件中保存了源代码编译之后的内容，以二进制文件的方式存储，可以用 jclasslib 工具解析字节码文件信息。</p>
+<p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240205191944.png" srcset="/notes/img/loading.gif" lazyload></p>
+<h5 id="基本信息"><a href="#基本信息" class="headerlink" title="基本信息"></a>基本信息</h5><p>magic 魔数用来标识二进制文件的类型。版本号用来标识编译此字节码文件的编译器版本，此版本必须小于等于 JVM 版本。</p>
+<h5 id="常量池"><a href="#常量池" class="headerlink" title="常量池"></a>常量池</h5><p>存放字符串常量</p>
+<p>常量池中的数据都有一个编号，编号从 1 开始。在字段或者字节码指令中通过编号可以快速的找到对应的数据。</p>
+<h5 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h5><p>存放每个方法的字节码指令序列，下面是一个示例，两个核心部分分别是操作数栈和局部变量表</p>
+<p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240205193307.png" srcset="/notes/img/loading.gif" lazyload></p>
+<h3 id="类的生命周期"><a href="#类的生命周期" class="headerlink" title="类的生命周期"></a>类的生命周期</h3><p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240205195048.png" srcset="/notes/img/loading.gif" lazyload></p>
+<h4 id="加载阶段"><a href="#加载阶段" class="headerlink" title="加载阶段"></a>加载阶段</h4><p>类加载器根据类的全限定名通过读取磁盘上的字节码文件或动态代理生成的方式获取字节码。</p>
+<p>加载完成后，JVM 会在方法区类信息内存中生成一个 C++的 InstanceKlass 对象，在堆区生成一个 class 对象，class 对象中存储了该类的所有静态属性。</p>
+<h4 id="连接阶段"><a href="#连接阶段" class="headerlink" title="连接阶段"></a>连接阶段</h4><h5 id="验证"><a href="#验证" class="headerlink" title="验证"></a>验证</h5><p>检测 Java 字节码文件是否遵守 Java 虚拟机规范</p>
+<h5 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h5><p>为所有静态属性分配内存并设置初始值</p>
+<h5 id="解析"><a href="#解析" class="headerlink" title="解析"></a>解析</h5><p>将常量池中的符号引用替换为内存直接引用。在类加载之前只看字节码文件的话，比如字节码指令序列中调了<code>#6</code>方法，我们只能在常量池中找到这个方法的类名方法名，而在类加载中替换为内存直接引用后，我们就能在方法区运行时常量池中直接得到此方法的内存地址，因为此时此方法所在类一定已经加载到了方法区类信息中。</p>
+<h4 id="初始化阶段"><a href="#初始化阶段" class="headerlink" title="初始化阶段"></a>初始化阶段</h4><p>按顺序进行所有静态属性的初始化和静态代码块的运行。本质是执行字节码文件中 clinit 部分的字节码指令。</p>
+<p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240205201612.png" srcset="/notes/img/loading.gif" lazyload></p>
+<h3 id="类加载器"><a href="#类加载器" class="headerlink" title="类加载器"></a>类加载器</h3><p>类加载器(ClassLoader)只负责类加载中的加载阶段。读入字节码数据放入内存转换成 byte[]，接下来调用虚拟机底层 native 方法根据 byte[]在方法区类信息生成 InstanceKlass 对象，在堆区生成 class 对象。</p>
+<h4 id="类加载器的分类"><a href="#类加载器的分类" class="headerlink" title="类加载器的分类"></a>类加载器的分类</h4><h5 id="启动类加载器"><a href="#启动类加载器" class="headerlink" title="启动类加载器"></a>启动类加载器</h5><p>使用 C++实现的类加载器，加载 Java 中最核心的类，默认加载 Java 安装目录&#x2F;jre&#x2F;lib 下的类文件。</p>
+<h5 id="扩展类加载器"><a href="#扩展类加载器" class="headerlink" title="扩展类加载器"></a>扩展类加载器</h5><p>使用 Java 实现的类加载器，加载 Java 中的扩展类，默认加载 Java 安装目录&#x2F;jre&#x2F;lib&#x2F;ext 下的类文件。</p>
+<h5 id="应用程序类加载器"><a href="#应用程序类加载器" class="headerlink" title="应用程序类加载器"></a>应用程序类加载器</h5><p>使用 Java 实现的类加载器，加载源码类和 jar 包类，默认加载 classpath 下的类文件。</p>
+<h4 id="双亲委派机制"><a href="#双亲委派机制" class="headerlink" title="双亲委派机制"></a>双亲委派机制</h4><p>当我们使用应用程序类加载器或扩展类加载器去加载类的时候（注意我们在 java 代码中拿不到启动类加载器），会从下向上的判断要加载的类是否已经被当前类加载器加载，如果已被加载则直接返回。如果一直到启动类加载器都没有加载过，则从上到下判断哪个加载器可以加载该类，如果找到就加载后返回，如果找不到最后抛出 ClassNotFoundException</p>
+<p>两种方法的区别：</p>
+<ul>
+<li>loadClass 方法：只加载，不会连接和初始化</li>
+<li>forName 方法：加载连接初始化</li>
+</ul>
+<p>双亲委派机制的作用：</p>
+<ul>
+<li>避免重复加载</li>
+<li>保证类加载的安全性，避免恶意代码替换 JDK 中的核心类库</li>
+</ul>
+<h4 id="打破双亲委派机制"><a href="#打破双亲委派机制" class="headerlink" title="打破双亲委派机制"></a>打破双亲委派机制</h4><p>自定义类加载器，重写 loadClass 方法，即可打破双亲委派机制。</p>
+<h5 id="为什么要打破双亲委派机制"><a href="#为什么要打破双亲委派机制" class="headerlink" title="为什么要打破双亲委派机制"></a>为什么要打破双亲委派机制</h5><p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240206112214.png" srcset="/notes/img/loading.gif" lazyload></p>
+<p>两个自定义类加载器加载相同限定名的类，不会冲突，因为在同一个 Java 虚拟机中，只有相同类加载器+相同的类限定名才会被认为是同一个类。</p>
+<h5 id="SPI-机制"><a href="#SPI-机制" class="headerlink" title="SPI 机制"></a>SPI 机制</h5><p>JDBC 中使用了 DriverManager 来管理项目中引入的不同数据库的驱动，比如 mysql 驱动、oracle 驱动。实际应用中，只需要引入相关数据库驱动的 jar 包即可自动进行类加载，这个过程依靠 SPI 机制实现。</p>
+<p>SPI 是一个为某个接口自动装配实现实例的机制。有点类似 IOC 的思想，就是将装配的控制权移到程序之外。当服务的提供者，提供了服务接口的一种实现之后，在 jar 包的 META-INF&#x2F;services&#x2F;目录里同时创建一个以服务接口命名的文件。该文件里就是实现该服务接口的具体实现类的类名。而当外部程序装配这个模块的时候，就能通过该 jar 包 META-INF&#x2F;services&#x2F;里的配置文件找到具体的实现类名，并装载实例化，完成模块的注入。</p>
+<h2 id="JVM-内存模型"><a href="#JVM-内存模型" class="headerlink" title="JVM 内存模型"></a>JVM 内存模型</h2><p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240206192912.png" srcset="/notes/img/loading.gif" lazyload></p>
+<h3 id="程序计数器"><a href="#程序计数器" class="headerlink" title="程序计数器"></a>程序计数器</h3><p>每个线程会通过程序计数器记录当前要执行的的字节码指令的地址，程序计数器可以控制程序指令的进行，实现分支、跳转、异常等逻辑。</p>
+<p>程序计数器不存在内存溢出问题</p>
+<h3 id="方法栈"><a href="#方法栈" class="headerlink" title="方法栈"></a>方法栈</h3><p>Java 虚拟机栈和本地方法栈本质是一个方法栈。方法栈中是一个个栈帧，每个栈帧都存了局部变量表、操作数栈和帧数据。</p>
+<ul>
+<li>局部变量表：存放方法中的 this 对象地址、形参以及局部变量</li>
+<li>操作数栈：虚拟机在执行指令过程中用来存放临时数据的一块区域</li>
+<li>帧数据：当前栈帧结束后的返回地址、异常表等</li>
+</ul>
+<p>栈帧过多（比如无限递归），超过栈内存最大大小就会出现内存溢出 StackOverflowError</p>
+<h3 id="堆区"><a href="#堆区" class="headerlink" title="堆区"></a>堆区</h3><p>存放所有对象。堆空间有三个需要关注的值，used total max。used 指的是当前已使用的堆内存，total 是 java 虚拟机已经分配的可用堆内存，max 是 java 虚拟机可以分配的最大堆内存。</p>
+<p>对象过多或对象中数据过大会出现堆内存溢出<code>OutOfMemory</code></p>
+<h3 id="方法区"><a href="#方法区" class="headerlink" title="方法区"></a>方法区</h3><p>又称元空间，使用的是直接内存</p>
+<p>存放类信息、运行时常量池、字符串常量池</p>
+<ul>
+<li>类信息：所有已经加载的类的 InstanceKlass 对象</li>
+<li>运行时常量池：存放常量符号到内存地址的直接映射，包括类、接口、属性等等</li>
+<li>字符串常量池：存储在代码中定义的常量字符串内容</li>
+</ul>
+<p>当无限加载类的时候，方法区也是会内存溢出的，报<code>java.lang.OutOfMemoryError: Metaspace</code></p>
+<h3 id="直接内存"><a href="#直接内存" class="headerlink" title="直接内存"></a>直接内存</h3><p>直接内存不会被 GC，常应用于 NIO，目的是为了减少内存复制次数。</p>
+<h2 id="自动垃圾回收"><a href="#自动垃圾回收" class="headerlink" title="自动垃圾回收"></a>自动垃圾回收</h2><p>Java 中为了简化对象内存的释放，引入了自动的垃圾回收(Garbage Collection 简称 GC)机制。</p>
+<h3 id="方法区回收"><a href="#方法区回收" class="headerlink" title="方法区回收"></a>方法区回收</h3><p>线程独享的程序计数器和方法栈是不需要垃圾回收的。</p>
+<p>方法区的回收主要就是类的卸载，当满足如下三个条件时，方法区类信息中该类的 InstanceKlass 对象被清除，运行时常量池和字符串常量池中该类相关的数据被清除，堆区中该类的 class 对象被清除。</p>
+<ul>
+<li>此类所有实例对象都已经被回收，在堆中不存在任何该类的实例对象以及子类对象。</li>
+<li>加载该类的类加载器已经被回收。</li>
+<li>该类对应的 java.lang.Class 对象没有在任何地方被引用。</li>
+</ul>
+<p>如果我们不自定义类加载器的话，则所有类都是由启动类加载器或扩展类加载器或应用程序类加载器加载的，则不会出现类的卸载。</p>
+<p>调用 System.gc()方法并不一定会立即回收垃圾，仅仅是向 Java 虚拟机发送一个垃圾回收的请求，具体是否需要执行垃圾回收 Java 虚拟机会自行判断。</p>
+<h3 id="堆区回收"><a href="#堆区回收" class="headerlink" title="堆区回收"></a>堆区回收</h3><h4 id="引用计数法和可达性分析法"><a href="#引用计数法和可达性分析法" class="headerlink" title="引用计数法和可达性分析法"></a>引用计数法和可达性分析法</h4><p>一个 java 对象是否可以被回收取决于这个对象是否仍被引用</p>
+<h5 id="引用计数法"><a href="#引用计数法" class="headerlink" title="引用计数法"></a>引用计数法</h5><p>为每个对象维护一个引用计数器，当对象被引用时加 1，取消引用时减 1。</p>
+<h5 id="可达性分析法"><a href="#可达性分析法" class="headerlink" title="可达性分析法"></a>可达性分析法</h5><p>JVM 使用的就是这种方法。可达性分析法将对象分为两类:垃圾回收的根对象(GC Root 对象)和普通对象，对象与对象之间存在引用关系。一个对象只要能追溯到某个 GC Root 对象，则它就不能被回收。</p>
+<p>GC Root 对象有四类：</p>
+<ul>
+<li>线程 Thread 对象，关联该线程方法栈中所有 this 对象、形参、局部变量</li>
+<li>class 对象，关联该类的所有静态属性</li>
+<li>synchronized 关键字持有的对象</li>
+<li>本地方法调用时使用的全局对象（不需要关注）</li>
+</ul>
+<p>下图是一个示例：<br><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240207145226.png" srcset="/notes/img/loading.gif" lazyload></p>
+<h4 id="五种对象引用"><a href="#五种对象引用" class="headerlink" title="五种对象引用"></a>五种对象引用</h4><ul>
+<li>强引用：可达性算法描述的引用</li>
+<li>软引用：如果一个对象只有软引用关联到它，当堆内存不足时，就会将该对象回收，JDK 提供 SoftReference 类来实现软引用。软引用适用于缓存场景。</li>
+<li>弱引用：弱引用包含的对象在垃圾回收时，不管内存够不够都会直接被回收。</li>
+<li>虚引用</li>
+<li>终结器引用</li>
+</ul>
+<h4 id="垃圾回收算法"><a href="#垃圾回收算法" class="headerlink" title="垃圾回收算法"></a>垃圾回收算法</h4><p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240207172743.png" srcset="/notes/img/loading.gif" lazyload></p>
+<h5 id="GC-算法的评价标准"><a href="#GC-算法的评价标准" class="headerlink" title="GC 算法的评价标准"></a>GC 算法的评价标准</h5><ul>
+<li>吞吐量：执行用户代码时间 &#x2F; (执行用户代码时间 + GC 时间)</li>
+<li>最大暂停时间：所有垃圾回收过程中的 STW 时间最大值</li>
+<li>堆使用效率：百分之多少的堆内存能够用于实际存放对象</li>
+</ul>
+<h5 id="标记清除算法"><a href="#标记清除算法" class="headerlink" title="标记清除算法"></a>标记清除算法</h5><p>利用可达性分析算法，从 GC Root 开始通过引用链遍历并标记所有存活对象，然后清除所有未标记对象</p>
+<h5 id="标记整理算法"><a href="#标记整理算法" class="headerlink" title="标记整理算法"></a>标记整理算法</h5><p>利用可达性分析算法，从 GC Root 开始通过引用链遍历并标记所有存活对象，将所有存活对象移动到堆的一端</p>
+<h5 id="复制算法"><a href="#复制算法" class="headerlink" title="复制算法"></a>复制算法</h5><p>将堆内存分割成两块相等的 from 空间 to 空间，在 from 空间存放对象，GC 时将 From 中存活对象复制到 To 空间，将两块空间的 From 和 To 名字互换</p>
+<h5 id="分代算法"><a href="#分代算法" class="headerlink" title="分代算法"></a>分代算法</h5><p>分代算法将堆内存划分为年轻代和老年代，其中年轻代又分为伊甸园区和幸存者区，幸存者区分为 from 空间和 to 空间。新创建的对象会被放入伊甸园区，伊甸园区满会触发 Minor GC，将伊甸园区和 From 空间中需要回收的对象回收，把没有回收的对象放入 To 区，然后交换 from 和 to 名字。每次 Minor GC 都会让对象年龄加一。如果 Minor GC 后对象的年龄达到阈值，该对象就会被转移到老年代。当老年代空间不足时会触发 Full GC，Full GC 会对年轻代、老年代和元空间（方法区）进行回收。如果 Full GC 后老年代空间仍然不足，则会抛出 Out Of Memory 异常。</p>
+<p>为什么分代算法要分年轻代和老年代，原因是防止长期存活对象在 from 空间和 to 空间之间被不断复制。</p>
+<p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240207181056.png" srcset="/notes/img/loading.gif" lazyload></p>
+<h4 id="几种垃圾回收器"><a href="#几种垃圾回收器" class="headerlink" title="几种垃圾回收器"></a>几种垃圾回收器</h4><p>需要掌握下图三条实线连接的垃圾回收器和 G1 垃圾回收器，实际具体选择哪种垃圾回收器，和业务类型相关。</p>
+<p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240207183700.png" srcset="/notes/img/loading.gif" lazyload></p>
+<h5 id="Serial-SerialOld"><a href="#Serial-SerialOld" class="headerlink" title="Serial-SerialOld"></a>Serial-SerialOld</h5><p>Serial 和 SerialOld 都是单线程串行垃圾回收器</p>
+<p>Serial-SerialOld 适用于单核 cpu</p>
+<p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240207184741.png" srcset="/notes/img/loading.gif" lazyload></p>
+<h5 id="ParNew-CMS"><a href="#ParNew-CMS" class="headerlink" title="ParNew-CMS"></a>ParNew-CMS</h5><p>ParNew 是多线程串行垃圾回收器<br><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240207190638.png" srcset="/notes/img/loading.gif" lazyload></p>
+<p>CMS 的过程比较复杂，涉及到串行&#x2F;并行，单线程&#x2F;多线程<br><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240207190753.png" srcset="/notes/img/loading.gif" lazyload></p>
+<p>ParNew-CMS 适用于大型的互联网系统中用户请求数据量大、频率高的场景。比如订单接口、商品接口等</p>
+<h5 id="PS-PO"><a href="#PS-PO" class="headerlink" title="PS-PO"></a>PS-PO</h5><p>JDK8 默认的垃圾回收器，Parallel Scavenge 和 Parallel Old 都是多线程串行垃圾回收器，可以自动调整堆内存大小</p>
+<p>PS-PO 相比于 STW 更关注吞吐量大小，因此适用于不需要与用户交互的后台任务处理。比如:大数据的处理，大文件导出</p>
+<p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240207191944.png" srcset="/notes/img/loading.gif" lazyload></p>
+<h5 id="G1-垃圾回收器"><a href="#G1-垃圾回收器" class="headerlink" title="G1 垃圾回收器"></a>G1 垃圾回收器</h5><p>JDK9 及之后的默认垃圾回收器。性能要高于其他垃圾回收器。</p>
+<h2 id="实际业务调优"><a href="#实际业务调优" class="headerlink" title="实际业务调优"></a>实际业务调优</h2><h3 id="内存调优"><a href="#内存调优" class="headerlink" title="内存调优"></a>内存调优</h3><p>观察程序的堆内存曲线，如果正常就不需要进行内存调优，如果异常比如发现了存在大量不可回收对象或存在内存泄露或出现内存突然飙高乃至溢出的现象，这时就需要进行内存调优，找到大量不可回收对象是什么、哪里出现的内存泄露、内存溢出是什么原因（是持续性的内存泄露导致的，还是内存峰值过高导致的，如果是内存峰值过高导致的，要么分配更多的堆内存、要么修改代码降低内存峰值）</p>
+<p>堆内存泄漏：某个对象不再使用却仍然引用它，该对象依然在 GC ROOT 的引用链上</p>
+<h4 id="一些可能引起内存溢出的原因"><a href="#一些可能引起内存溢出的原因" class="headerlink" title="一些可能引起内存溢出的原因"></a>一些可能引起内存溢出的原因</h4><ul>
+<li>持续的内存泄露<ul>
+<li>往 ThreadLocal 里面放对象后不去清除，这时只要这个线程没有结束，ThreadLocal 里面的对象就会一直在。这种情况常发生于线程池。</li>
+<li>大量的数据在静态属性中被引用，但是不再使用，成为了内存泄漏。</li>
+</ul>
+</li>
+<li>并发请求问题：某些接口由于用户的并发请求量有可能很大，同时处理数据的时间很长，导致大量的数据存在于内存中，最终超过了内存的上限，导致内存溢出。</li>
+</ul>
+<h4 id="发现内存问题"><a href="#发现内存问题" class="headerlink" title="发现内存问题"></a>发现内存问题</h4><ul>
+<li>top 命令：实时地查看系统的资源</li>
+<li>VisualVM：监控一个 Java 进程的堆内存曲线，微服务比较多的时候不太方便用</li>
+<li>Arthas：功能很强大的线上监控诊断产品</li>
+<li>Prometheus + Grafana：企业中运维常用的监控方案，其中 Prometheus 用来采集系统或者应用的相关数据，同时具备告警功能。Grafana 可以将 Prometheus 采集到的数据以可视化的方式进行展示。</li>
+</ul>
+<p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240208160227.png" srcset="/notes/img/loading.gif" lazyload></p>
+<h4 id="定位问题代码"><a href="#定位问题代码" class="headerlink" title="定位问题代码"></a>定位问题代码</h4><p>我们可以通过<code>-XX:+HeapDumpOnOutOfMemoryError</code>虚拟参数，设置堆内存溢出时自动生成内存快照（hprof 文件），将整个堆内存保存下来。</p>
+<p><code>-XX:+HeapDumpBeforeFullGC</code>虚拟机参数可以在 FullGC 之前生成内存快照。</p>
+<p>如果要导出运行中系统的内存快照</p>
+<p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240208164715.png" srcset="/notes/img/loading.gif" lazyload></p>
+<h5 id="MAT-软件分析内存快照文件"><a href="#MAT-软件分析内存快照文件" class="headerlink" title="MAT 软件分析内存快照文件"></a>MAT 软件分析内存快照文件</h5><p>MAT 会首先生成一个支配树，在对象引用<br>图中，所有指向对象 B 的路径都经过对象 A，则认为对象 A 支配对象 B。</p>
+<p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240208162855.png" srcset="/notes/img/loading.gif" lazyload></p>
+<p>对于支配树中的某个节点对象，对象本身占用的空间称为浅堆，对象子树的所有空间称为深堆，深堆的大小表示该对象如果可以被回收，能释放多大的内存空间。</p>
+<p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240208163333.png" srcset="/notes/img/loading.gif" lazyload></p>
+<p>MAT 就是遍历支配树，如果发现某节点深堆的大小超过整个堆内存的一定比例阈值，就会将其标记成内存泄漏的”嫌疑对象”</p>
+<h4 id="排查内存问题的方式"><a href="#排查内存问题的方式" class="headerlink" title="排查内存问题的方式"></a>排查内存问题的方式</h4><ol>
+<li>服务出现 OOM 内存溢出时，生成内存快照</li>
+<li>使用 MAT 分析内存快照，找到内存溢出的对象</li>
+<li>尝试在开发环境中重现问题，分析代码中问题产生的原因</li>
+<li>修改代码</li>
+<li>测试并验证结果</li>
+</ol>
+<h4 id="一些设计上引起的内存溢出"><a href="#一些设计上引起的内存溢出" class="headerlink" title="一些设计上引起的内存溢出"></a>一些设计上引起的内存溢出</h4><ul>
+<li>某分页查询接口 OOM，问题根源是高并发、单次查询数据量大<ol>
+<li>限制单次查询数据量</li>
+<li>高峰期直接限流保护</li>
+</ol>
+</li>
+<li>某并发处理大量数据的程序 OOM，问题根源是线程每次读入内存的数据量过大，导致内存峰值过大<ol>
+<li>减少单批读入内存的数据量大小</li>
+</ol>
+</li>
+</ul>
+<h3 id="GC-调优"><a href="#GC-调优" class="headerlink" title="GC 调优"></a>GC 调优</h3><p>观察程序的 GC 吞吐量和 GC STW 值，如果 GC 吞吐量较高、STW 很低，那么就不需要进行 GC 调优，如果出现了 GC 吞吐量低、STW 较高的情况，那么就需要进行 GC 调优，首先如果出现了频繁 FULLGC，那么是由于内存过高导致的，这时又回到了内存调优，如果不存在频繁 FULLGC 现象，我们可以选择合适的垃圾回收器、设置合适的 JVM 参数来提高 GC 效率。</p>
+<h4 id="发现-GC-问题"><a href="#发现-GC-问题" class="headerlink" title="发现 GC 问题"></a>发现 GC 问题</h4><p>通过 GC 日志，可以得到每次 GC 的详细信息，比如本次 GC 使用什么垃圾回收器、是 MinorGC 还是 FullGC、回收了多少内存、耗时多久等等。</p>
+<ul>
+<li>使用方法(JDK 8 及以下):<code>-XX:+PrintGCDetails -Xloggc:文件名</code></li>
+<li>使用方法(JDK 9+):<code>-Xlog:gc\*:file=文件名</code></li>
+</ul>
+<p>我们可以用 GCeasy 来分析 GC 日志，网址是<code>https://gceasy.io/</code></p>
+<p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240210154617.png" srcset="/notes/img/loading.gif" lazyload></p>
+<p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240210154734.png" srcset="/notes/img/loading.gif" lazyload></p>
+<p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240210154816.png" srcset="/notes/img/loading.gif" lazyload></p>
+<p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240210160447.png" srcset="/notes/img/loading.gif" lazyload></p>
+<p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240210160625.png" srcset="/notes/img/loading.gif" lazyload></p>
+<h4 id="解决-GC-问题的手段"><a href="#解决-GC-问题的手段" class="headerlink" title="解决 GC 问题的手段"></a>解决 GC 问题的手段</h4><h5 id="优化基础-JVM-参数"><a href="#优化基础-JVM-参数" class="headerlink" title="优化基础 JVM 参数"></a>优化基础 JVM 参数</h5><p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240210161146.png" srcset="/notes/img/loading.gif" lazyload></p>
+<p>-Xmx 和 –Xms 一般设置成相等的值</p>
+<p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240210161529.png" srcset="/notes/img/loading.gif" lazyload></p>
+<p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240210161607.png" srcset="/notes/img/loading.gif" lazyload></p>
+<p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240210163225.png" srcset="/notes/img/loading.gif" lazyload></p>
+<p>其余 JVM 参数如年轻代大小、伊甸园区和幸存者区内存比例等不建议自己设置</p>
+<h5 id="更换垃圾回收器"><a href="#更换垃圾回收器" class="headerlink" title="更换垃圾回收器"></a>更换垃圾回收器</h5><p>根据业务类型和垃圾回收器特性设置即可</p>
+<h3 id="性能调优"><a href="#性能调优" class="headerlink" title="性能调优"></a>性能调优</h3><p>性能调优适用于，在不需要进行内存调优和 GC 调优时，发现程序导致 cpu 飙高或某个接口响应时间过长或出现死锁，这时可以进行性能调优。</p>
+<h4 id="cpu-飙高问题"><a href="#cpu-飙高问题" class="headerlink" title="cpu 飙高问题"></a>cpu 飙高问题</h4><p>利用<code>top</code>命令定位哪个进程的哪个线程存在很高的 cpu 占用率，使用<code>jstack 进程ID &gt; 文件名</code>命令进行 Thread Dump 线程转储（打一份线程当前状态的快照）。然后查看下 cpu 飙高线程当前的方法栈。</p>
+<h4 id="死锁问题"><a href="#死锁问题" class="headerlink" title="死锁问题"></a>死锁问题</h4><p>通过<code>jstack -l 进程ID &gt; 文件名</code>命令进行线程 dump，然后在文件中搜索 deadlock 即可找到死锁位置。</p>
+<h4 id="接口响应时间很长问题"><a href="#接口响应时间很长问题" class="headerlink" title="接口响应时间很长问题"></a>接口响应时间很长问题</h4><p>我们需要定位接口中的哪一部分代码导致的性能问题，可以借助 Arthas 的 trace 命令。</p>
+<p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240210184244.png" srcset="/notes/img/loading.gif" lazyload></p>
+<h4 id="如何测试一个方法的耗时"><a href="#如何测试一个方法的耗时" class="headerlink" title="如何测试一个方法的耗时"></a>如何测试一个方法的耗时</h4><p>由于存在懒加载对象，所以第一次方法调用的时间有可能很长，由于多次执行方法 JIT 会进行优化，因此经过充分预热后的测试才是准确的。因此我们一般使用 JMH 框架进行预热后的测试。</p>
+<h2 id="JVM-扩展知识"><a href="#JVM-扩展知识" class="headerlink" title="JVM 扩展知识"></a>JVM 扩展知识</h2><h3 id="GraalVM"><a href="#GraalVM" class="headerlink" title="GraalVM"></a>GraalVM</h3><p>GraalVM 是 Oracle 官方推出的一款高性能 JDK，核心优势是可以编译成可执行文件（失去跨平台特性），具有更快的启动速度、更低的内存和 cpu 使用率。</p>
+<h3 id="新一代的-GC"><a href="#新一代的-GC" class="headerlink" title="新一代的 GC"></a>新一代的 GC</h3><h4 id="Shenandoah"><a href="#Shenandoah" class="headerlink" title="Shenandoah"></a>Shenandoah</h4><p>Shenandoah 是由 Red Hat 开发的一款低延迟的垃圾回收器，无论堆大小如何，Shenandoah 都能通过多次回收的方式将 STW 尽量控制在 10ms 以下。</p>
+<p>Shenandoah 不是 oraclejdk 的可选垃圾回收器，它只存在于 openjdk 中。</p>
+<h4 id="ZGC"><a href="#ZGC" class="headerlink" title="ZGC"></a>ZGC</h4><p>ZGC 是 oracle 开发的低延迟垃圾回收器，将 STW 尽量控制在了 1ms 以下，ZGC 吞吐量不佳，且垃圾回收会占用大量额外堆内存，OracleJDK 和 OpenJDK 中都支持 ZGC。</p>
+<h3 id="Java-Agent"><a href="#Java-Agent" class="headerlink" title="Java Agent"></a>Java Agent</h3><p>Java Agent 技术是 JDK 提供的用来编写 Java 工具的技术，使用这种技术生成一种特殊的 jar 包，这种 jar 包可以让一个 Java 进程静态或动态地运行其中的代码。</p>
+<h4 id="静态加载模式"><a href="#静态加载模式" class="headerlink" title="静态加载模式"></a>静态加载模式</h4><p><code>java</code>命令运行时就指定好 Java Agent 的 jar 包，主线程会在执行 main 方法前先执行 premain 方法</p>
+<p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240211181717.png" srcset="/notes/img/loading.gif" lazyload></p>
+<h4 id="动态加载模式"><a href="#动态加载模式" class="headerlink" title="动态加载模式"></a>动态加载模式</h4><p>首先开启被加载的 java 进程，然后打开另一个 java 进程，给这个 java 进程输入被加载的 java 进程的进程号和 Java Agent 的 jar 包路径，这样这两个 java 进程可以通信，被加载的 java 进程也就能拿到 jar 包中的字节码，它会开一个新的线程来运行这段字节码。</p>
+<p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240211182146.png" srcset="/notes/img/loading.gif" lazyload></p>
+<h4 id="字节码增强技术"><a href="#字节码增强技术" class="headerlink" title="字节码增强技术"></a>字节码增强技术</h4><p>静态加载模式是在主线程 main 方法之前执行一段代码，动态加载模式是随时单开一个线程执行一段代码。</p>
+<p>借助 ASM 或 Byte Buddy 这两个字节码增强技术框架，我们可以修改加载到 JVM 内存中的字节码，比如在字节码指令序列的开头统计当前时间，在字节码指令序列的结尾统计当前时间然后相减得到该方法的执行时间。ASM 框架比较底层不太容易用，Byte Buddy 框架基于 ASM 框架开发，要简单一些。</p>
+<p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240211185740.png" srcset="/notes/img/loading.gif" lazyload></p>
+<p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240211185805.png" srcset="/notes/img/loading.gif" lazyload></p>
+<h2 id="JVM-底层原理"><a href="#JVM-底层原理" class="headerlink" title="JVM 底层原理"></a>JVM 底层原理</h2><h3 id="栈上的数据存储"><a href="#栈上的数据存储" class="headerlink" title="栈上的数据存储"></a>栈上的数据存储</h3><p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240212104643.png" srcset="/notes/img/loading.gif" lazyload></p>
+<p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240212113147.png" srcset="/notes/img/loading.gif" lazyload></p>
+<p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240212113301.png" srcset="/notes/img/loading.gif" lazyload></p>
+<p>无论是 32 位还是 64 位虚拟机，对于任意数值类型来说，栈内存字节数一定大于等于堆内存字节数。比如在 32 位虚拟机中 double 堆内存 8 字节、栈内存 8 字节，在 64 位虚拟机中 double 堆内存 8 字节、栈内存 16 字节。</p>
+<p>栈内存比堆内存大是存在空间浪费的，这是一种空间换时间的方案，在栈中不区分数值类型直接按槽 slot 进行计算，省去了根据不同数值类型进行不同计算方式的过程。</p>
+<p>堆中数据保存到栈上，无符号高位补 0 有符号高位补 0 或 1，栈中数据保存到堆上，超出部分舍弃即可。</p>
+<h3 id="对象在堆上是如何存储的"><a href="#对象在堆上是如何存储的" class="headerlink" title="对象在堆上是如何存储的"></a>对象在堆上是如何存储的</h3><p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240212122153.png" srcset="/notes/img/loading.gif" lazyload></p>
+<p>其中 Klass Word(Klass pointer)指向方法区栈信息中 InstanceKlass 对象的地址，32 位虚拟机中 Mark Word 和 Klass Word 都占 4 字节，64 位虚拟机中 Mark Word 和 Klass Word 都占 8 字节</p>
+<p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240212115608.png" srcset="/notes/img/loading.gif" lazyload></p>
+<h4 id="指针压缩"><a href="#指针压缩" class="headerlink" title="指针压缩"></a>指针压缩</h4><p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240212115816.png" srcset="/notes/img/loading.gif" lazyload></p>
+<p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240212120119.png" srcset="/notes/img/loading.gif" lazyload></p>
+<p>指针压缩虽然可以降低对象占用内存，但也有两个问题，第一是要求所有对象占用堆内存的大小是 8 字节的倍数（内存对齐），第二是寻址范围变小，不用压缩指针，应该是 2 的 64 次方 &#x3D; 16EB，用了压缩指针就变成了 8(字节) &#x3D; 2 的 3 次方 * 2 的 32 次方 &#x3D; 2 的 35 次方</p>
+<h4 id="内存对齐"><a href="#内存对齐" class="headerlink" title="内存对齐"></a>内存对齐</h4><p>内存对齐主要目的是为了解决并发情况下 CPU 缓存失效的问题，一个 cpu 缓存内存块大小是 8 字节，要求所有对象占用堆内存的大小是 8 字节倍数的情况下，使得每个对象完整的占满整数个 cpu 缓存内存块，这样某个对象 cpu 缓存失效并不会导致其他对象 cpu 缓存失效。</p>
+<h5 id="字段重排列"><a href="#字段重排列" class="headerlink" title="字段重排列"></a>字段重排列</h5><p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240212121819.png" srcset="/notes/img/loading.gif" lazyload></p>
+<p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240212121843.png" srcset="/notes/img/loading.gif" lazyload></p>
+<h3 id="方法调用的原理"><a href="#方法调用的原理" class="headerlink" title="方法调用的原理"></a>方法调用的原理</h3><p>方法调用的本质是在栈上创建栈帧，然后程序计数器指向方法中的第一行字节码指令。以 invoke 开头的字节码指令的作用是执行方法的调用。</p>
+<p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240212123003.png" srcset="/notes/img/loading.gif" lazyload></p>
+<h4 id="静态绑定"><a href="#静态绑定" class="headerlink" title="静态绑定"></a>静态绑定</h4><p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240212122542.png" srcset="/notes/img/loading.gif" lazyload></p>
+<h4 id="动态绑定"><a href="#动态绑定" class="headerlink" title="动态绑定"></a>动态绑定</h4><p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240212122827.png" srcset="/notes/img/loading.gif" lazyload></p>
+<p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240212122845.png" srcset="/notes/img/loading.gif" lazyload></p>
+<p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240212122902.png" srcset="/notes/img/loading.gif" lazyload></p>
+<h3 id="异常捕获的原理"><a href="#异常捕获的原理" class="headerlink" title="异常捕获的原理"></a>异常捕获的原理</h3><h4 id="try-catch-实现"><a href="#try-catch-实现" class="headerlink" title="try-catch 实现"></a>try-catch 实现</h4><p>编译时字节码中生成的异常表在类加载后会存储到方法区的类信息中，在执行该方法时，异常表会被加载到栈帧的帧数据中，异常表中包含了该方法异常捕获的生效范围以及异常发生后跳转到的字节码指令位置。</p>
+<p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240212125203.png" srcset="/notes/img/loading.gif" lazyload></p>
+<p>程序运行中触发异常时，Java 虚拟机会从上至下遍历异常表中的所有条目。当触发异常的字节码的索引值在某个异常表条目的监控范围内，Java 虚拟机会判断所抛出的异常和该条目想要捕获的异常是否匹配。</p>
+<ol>
+<li>如果匹配，跳转到“跳转 PC”对应的字节码位置。</li>
+<li>如果遍历完都不能匹配，说明异常无法在当前方法执行时被捕获，此方法栈帧直接弹出，在上一层的栈帧中进行异常捕获的查询。</li>
+</ol>
+<h4 id="finally-实现"><a href="#finally-实现" class="headerlink" title="finally 实现"></a>finally 实现</h4><p>finally 中的字节码指令会插入到 try 和 catch 代码块中，保证在 try 和 catch 执行之后一定会执行 finally 中的代码。如下图所示，其中<code>iconst_3 istore1</code>这两条指令在三个位置出现了，这样就保证了没有抛异常、抛异常但捕获、抛异常但未捕获三种情况都会执行 finally 中的代码。</p>
+<p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240212131857.png" srcset="/notes/img/loading.gif" lazyload></p>
+<h3 id="JIT-即时编译器"><a href="#JIT-即时编译器" class="headerlink" title="JIT 即时编译器"></a>JIT 即时编译器</h3><p>执行一条字节码指令的时候，首先解释器会进行语法分析，然后根据结果进行对应的操作，这个逻辑是在 C++层面实现的，但是 JVM 本质是一个可执行文件，因此运行的还是机器码。JIT 会对一些热点方法的字节码进行优化，直接将其编译成机器码同时进行一些效率优化，之后执行这段字节码时就不再解释执行而是直接执行机器码，相比于解释执行更快的原因在于：</p>
+<ol>
+<li>这段机器码不是 C++逻辑编译生成的，而是字节码直接编译生成的</li>
+<li>进行了一些优化</li>
+<li>省去了语法解析的过程</li>
+</ol>
+<h4 id="JIT-即时编译器种类"><a href="#JIT-即时编译器种类" class="headerlink" title="JIT 即时编译器种类"></a>JIT 即时编译器种类</h4><p>在 HotSpot 中，有三款即时编译器，C1、C2 和 Graal，其中 Graal 在 GraalVM 章节中已经介绍过。 C1 编译效率比 C2 快，但是优化效果不如 C2。</p>
+<p>C1 即时编译器和 C2 即时编译器都有独立的线程去进行处理，内部会保存一个队列，队列中存放需要编译的任务。一般即时编译器是针对方法级别来进行优化的，当然也有对循环进行优化的设计。</p>
+<h4 id="常见的-JIT-即时编译器优化手段"><a href="#常见的-JIT-即时编译器优化手段" class="headerlink" title="常见的 JIT 即时编译器优化手段"></a>常见的 JIT 即时编译器优化手段</h4><h5 id="方法内联"><a href="#方法内联" class="headerlink" title="方法内联"></a>方法内联</h5><p>方法体中的字节码指令直接复制到调用方的字节码指令中，节省了创建栈帧的开销。</p>
+<h5 id="逃逸分析"><a href="#逃逸分析" class="headerlink" title="逃逸分析"></a>逃逸分析</h5><p>如果方法中的一个对象不会逃逸，只会被当前局部变量引用（不会调别的方法把这个对象传进去，也不会将这个对象 return 出去），那么该对象可以直接在栈上分配内存，不用分配堆内存。下面是一个例子</p>
+<p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240212134513.png" srcset="/notes/img/loading.gif" lazyload></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/notes/tags/%E5%85%AB%E8%82%A1%E6%96%87/" class="print-no-link">#八股文</a>
+      
+        <a href="/notes/tags/Java/" class="print-no-link">#Java</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>JVM总结</div>
+      <div>https://howard1209a.github.io/notes/2024/02/05/总结篇 JVM总结/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>howard1209a</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2024年2月5日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/notes/2024/02/13/%E5%85%AB%E8%82%A1%E7%AF%87%20%E4%BA%8C%E7%BA%A7%E7%BC%93%E5%AD%98%E6%80%BB%E7%BB%93%20/" title="二级缓存总结">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">二级缓存总结</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/notes/2024/01/28/%E6%80%BB%E7%BB%93%E7%AF%87%20%E7%AE%97%E6%B3%95%E7%9F%A5%E8%AF%86%E7%82%B9%E6%A3%80%E6%9F%A5%E6%80%BB%E7%BB%93/" title="算法知识点检查总结">
+                        <span class="hidden-mobile">算法知识点检查总结</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/notes/js/events.js" ></script>
+<script  src="/notes/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/notes/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/notes/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/notes/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

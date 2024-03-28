@@ -1,0 +1,895 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/notes/img/fluid.png">
+  <link rel="icon" href="/notes/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="howard1209a">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="SpringCloud 总结分布式架构相比于单体架构具有低耦合、业务拆分的特点，但也引入了一些问题比如数据一致性问题、复杂调用关系等等。微服务是一种分布式架构标准，微服务强调拆分粒度小、每个微服务独立程度高、每个微服务向外提供标准接口。 微服务拆分原则需要遵守：  不同微服务，不要重复开发相同业务 微服务数据独立，不要访问其它微服务的数据库  SpringCloud 是目前国内使用最广泛的微服务框">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SpringCloud总结">
+<meta property="og:url" content="https://howard1209a.github.io/notes/2023/11/23/%E6%80%BB%E7%BB%93%E7%AF%87%20SpringCloud%E6%80%BB%E7%BB%93%20/index.html">
+<meta property="og:site_name" content="笔记">
+<meta property="og:description" content="SpringCloud 总结分布式架构相比于单体架构具有低耦合、业务拆分的特点，但也引入了一些问题比如数据一致性问题、复杂调用关系等等。微服务是一种分布式架构标准，微服务强调拆分粒度小、每个微服务独立程度高、每个微服务向外提供标准接口。 微服务拆分原则需要遵守：  不同微服务，不要重复开发相同业务 微服务数据独立，不要访问其它微服务的数据库  SpringCloud 是目前国内使用最广泛的微服务框">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-11-23T12:26:09.000Z">
+<meta property="article:modified_time" content="2024-03-28T08:09:47.438Z">
+<meta property="article:author" content="howard1209a">
+<meta property="article:tag" content="八股文">
+<meta property="article:tag" content="SpringCloud">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>SpringCloud总结 - 笔记</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/notes/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/notes/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/notes/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"howard1209a.github.io","root":"/notes/","version":"1.9.5","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/notes/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/notes/js/utils.js" ></script>
+  <script  src="/notes/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/notes/">
+      <strong>howard1209a</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/notes/">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/notes/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/notes/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/notes/about/">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/notes/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="SpringCloud总结"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2023-11-23 20:26" pubdate>
+          2023年11月23日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          8k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          67 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">SpringCloud总结</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="SpringCloud-总结"><a href="#SpringCloud-总结" class="headerlink" title="SpringCloud 总结"></a>SpringCloud 总结</h1><p>分布式架构相比于单体架构具有低耦合、业务拆分的特点，但也引入了一些问题比如数据一致性问题、复杂调用关系等等。微服务是一种分布式架构标准，微服务强调拆分粒度小、每个微服务独立程度高、每个微服务向外提供标准接口。</p>
+<p>微服务拆分原则需要遵守：</p>
+<ul>
+<li>不同微服务，不要重复开发相同业务</li>
+<li>微服务数据独立，不要访问其它微服务的数据库</li>
+</ul>
+<p>SpringCloud 是目前国内使用最广泛的微服务框架。官网地址：<a target="_blank" rel="noopener" href="https://spring.io/projects/spring-cloud%E3%80%82">https://spring.io/projects/spring-cloud。</a></p>
+<p>SpringCloud 集成了各种微服务功能组件，并基于 SpringBoot 实现了这些组件的自动装配。SpringCloud 和 SpringBoot 之间存在版本兼容关系。</p>
+<p>SpringCloud 中的各种微服务之间采用 http 协议进行接口调用。RestTemplate 接口提供了 http 借口调用的实现。</p>
+<h2 id="微服务注册中心"><a href="#微服务注册中心" class="headerlink" title="微服务注册中心"></a>微服务注册中心</h2><p>微服务注册中心支持服务提供者注册信息，支持服务消费者获取服务提供者的注册信息。相比于服务提供者的接口地址写死在服务消费者代码中的方式，微服务注册中心一方面支持随时的服务提供者变动，另一方面也支持微服务调用的负载均衡。</p>
+<h3 id="Eureka"><a href="#Eureka" class="headerlink" title="Eureka"></a>Eureka</h3><p>Eureka 支持服务提供者注册服务信息，支持服务消费者定时拉取服务信息。服务提供者通过心跳的方式（默认 30s）告知 Eureka 自己的健康状态。</p>
+<p>我们可以直接在 SpringBoot 中启动一个 Eureka 微服务（通过引入相关依赖、配置 yml 文件、配置注解），然后将其他微服务作为服务提供者注册到 Eureka（通过引入相关依赖、配置 yml 文件），最后作为服务消费者的任何微服务都可以拉取 Eureka 中的服务注册信息进行相应的微服务接口调用（通过引入相关依赖、配置 yml 文件、配置注解）。</p>
+<p>微服务接口调用的负载均衡是通过 Ribbon 实现的，Ribbon 默认是采用懒加载。负载均衡接口 IRule 有一些默认的接口实现比如轮询（RoundRobin）、权重、区域优先等等。</p>
+<h3 id="Nacos"><a href="#Nacos" class="headerlink" title="Nacos"></a>Nacos</h3><p>Nacos 是阿里的产品，相比 Eureka 功能更丰富。Nacos 直接提供了操作系统可以直接运行的 bin 文件（依赖 jre）。</p>
+<h4 id="服务注册与拉取"><a href="#服务注册与拉取" class="headerlink" title="服务注册与拉取"></a>服务注册与拉取</h4><p>Nacos 将一个服务分为了多个集群（通常一个集群指的是某区域的一个机房），每个集群又分为了多个实例。微服务互相访问时，应该尽可能访问同集群实例，因为本地访问速度更快。当本集群内不可用时，才访问其它集群。</p>
+<p>我们同样可以通过引入相关依赖、配置 yml 文件、操作 Nacos 的 web 控制台的方式，完成服务提供者的集群注册、负载权重配置、服务消费者拉取信息等操作。</p>
+<p>Nacos 注册中心对于服务提供者除了心跳检测还会主动询问，除了服务消费者会定时拉取 Nacos 注册中心信息外，Nacos 还会向服务消费者主动推送变更消息。</p>
+<h4 id="配置管理与热更新"><a href="#配置管理与热更新" class="headerlink" title="配置管理与热更新"></a>配置管理与热更新</h4><p>我们可以在 Nacos 的 web 控制台上创建 yaml 配置，并将需要热更新的配置放在其中，这样微服务的配置信息就由 bootstrap.yaml、Nacos 在线 yaml 和 application.yml 共同组成，我们通过@Value 注解或@ConfigurationProperties 注解就可以读取热更新配置。当然上述过程还是需要通过引入相关依赖、配置 yml 文件、配置注解来完成。</p>
+<p>Nacos 在线 yaml 配置有两种：</p>
+<ul>
+<li><p><code>[spring.application.name]-[spring.profiles.active].yaml</code>，例如：userservice-dev.yaml</p>
+</li>
+<li><p><code>[spring.application.name].yaml</code>，例如：userservice.yaml</p>
+</li>
+</ul>
+<p><code>[spring.application.name].yaml</code>不包含环境，因此可以被多个环境共享。</p>
+<h2 id="微服务远程调用"><a href="#微服务远程调用" class="headerlink" title="微服务远程调用"></a>微服务远程调用</h2><p>单体应用只需要提供接口给用户即可，但微服务由于其高内聚低耦合的特点，一方面微服务接口的实现需要依赖其他微服务接口，另一方面微服务接口也需同时提供给用户和其他微服务。</p>
+<h3 id="RestTemplate"><a href="#RestTemplate" class="headerlink" title="RestTemplate"></a>RestTemplate</h3><h3 id="Feign"><a href="#Feign" class="headerlink" title="Feign"></a>Feign</h3><p>Feign 是一种接口声明式的 http 微服务调用请求，我们可以对每个微服务声明一个接口，在里面为微服务的每个服务接口声明一个方法，可以指定微服务名称（用来从注册中心拉取信息）、请求方式（Get）、资源路径、pojo 返回类型。Feign 的微服务调用和 RPC 有点像。</p>
+<p>Feign 底层依赖的 http 请求框架有多种，如果选择支持 http 连接池的框架则可能会带来性能优化。</p>
+<h2 id="微服务网关"><a href="#微服务网关" class="headerlink" title="微服务网关"></a>微服务网关</h2><h3 id="Gateway"><a href="#Gateway" class="headerlink" title="Gateway"></a>Gateway</h3><p>Gateway 基于响应式编程，提供了权限控制、请求路由和服务限流等核心功能。</p>
+<ul>
+<li>权限控制：网关作为微服务入口，需要校验用户是是否有请求资格，如果没有则进行拦截。</li>
+<li>路由和负载均衡：一切请求都必须先经过 gateway，但网关不处理业务，而是根据某种规则，把请求转发到某个微服务，这个过程叫做路由。当然路由的目标服务有多个时，还需要做负载均衡。</li>
+<li>限流：当请求流量过高时，在网关中按照对应微服务能够接受的速度来放行请求，避免服务压力过大。</li>
+</ul>
+<p>引入相关依赖、配置 yml 文件即可启动 Gateway 网关微服务。</p>
+<h4 id="过滤器"><a href="#过滤器" class="headerlink" title="过滤器"></a>过滤器</h4><p>过滤器可以对路由的请求或响应做加工处理，比如添加请求头等。Gateway 提供了多种类型的过滤器实现，我们可以在 yml 文件中配置路由过滤器和默认过滤器（只可以使用 Gateway 提供的过滤器），我们也可以实现自己的全局过滤器，通过编写自定义逻辑实现登陆状态判断、权限校验、请求限流等功能。</p>
+<p>多个过滤器执行的先后顺序取决于 order 值。</p>
+<h4 id="跨域问题"><a href="#跨域问题" class="headerlink" title="跨域问题"></a>跨域问题</h4><p>application.yml 中可以进行配置。</p>
+<h2 id="微服务部署"><a href="#微服务部署" class="headerlink" title="微服务部署"></a>微服务部署</h2><p>大型项目微服务很多，多个微服务之间可能存在依赖冲突，但每个微服务都单独部署在一个服务器不太实际，Docker 可以解决微服务间的依赖兼容性问题。</p>
+<h3 id="Docker"><a href="#Docker" class="headerlink" title="Docker"></a>Docker</h3><h4 id="Docker-实现机制"><a href="#Docker-实现机制" class="headerlink" title="Docker 实现机制"></a>Docker 实现机制</h4><p>docker 容器的运行由 docker 引擎管理（docker 引擎由一系列负责各个功能的进程组成），根据 docker 官方推荐，大多数情况下我们只会在一个 docker 容器中运行一个进程，这个进程本质就是外部宿主机上 linux 内核的一个进程，可以直接在宿主机上查到。</p>
+<p>docker 的关键是 linux 内核提供的隔离技术，多个 Docker 容器间通过 Namespace 技术进行进程隔离，通过 Cgroups 技术进行进程资源限制。这也是我们进入 Docker 容器内部感觉像是一个完整操作系统的原因。</p>
+<p>docker 镜像打包的其实是文件系统中的文件、要运行的程序等等。</p>
+<p>docker 镜像是分层的，这使得多个 Docker 镜像间可以共享相同层。</p>
+<h4 id="Docker-与虚拟化技术对比"><a href="#Docker-与虚拟化技术对比" class="headerlink" title="Docker 与虚拟化技术对比"></a>Docker 与虚拟化技术对比</h4><p>docker 的实现与虚拟化没有关系，本质就是进程隔离，因此硬盘占用低、启动速度快。</p>
+<p>Vmware 这种虚拟化技术，是在宿主操作系统的基础上，用软件虚拟出一套计算机硬件（这个中间层称为 Hypervisor），再基于虚拟出来的这套硬件安装任何想要的操作系统。因此应用运行在虚拟机上时，想要操作底层真实硬件需要依次通过虚拟机操作系统、Hypervisor、宿主机操作系统、底层真实硬件。因此硬盘占用大、启动慢、性能差。</p>
+<h4 id="Docker-关键点"><a href="#Docker-关键点" class="headerlink" title="Docker 关键点"></a>Docker 关键点</h4><ul>
+<li>文件挂载：支持目录挂载、文件挂载。一方面方便修改配置文件，一方面容器删除后数据保留（如 mysql）。</li>
+<li>构建镜像：<ul>
+<li>把当前容器构建为镜像</li>
+<li>Dockerfile 构建镜像</li>
+</ul>
+</li>
+<li>DockerCompose：DockerCompose 脚本可以自动化构建镜像、运行容器。DockerCompose 可以实现微服务的自动部署。</li>
+<li>网络通信：<ul>
+<li>Docker 容器和外部网络通信需要在运行 Docker 容器的时候映射端口</li>
+<li>Docker 容器与 Docker 容器之间的网络通信时，IP 写 Docker 容器名字即可，Docker 底层做好了实现。</li>
+</ul>
+</li>
+<li>镜像仓库：可以搭建公司私有仓库。</li>
+</ul>
+<h2 id="消息队列-MQ"><a href="#消息队列-MQ" class="headerlink" title="消息队列 MQ"></a>消息队列 MQ</h2><p>业务异步级联可以提高吞吐量、降低业务耦合、流量削峰填谷。缺点是架构变复杂了，需要引入 MQ 消息队列。</p>
+<p>常见的 MQ 技术包含：</p>
+<ul>
+<li>ActiveMQ</li>
+<li>RabbitMQ</li>
+<li>RocketMQ</li>
+<li>Kafka</li>
+</ul>
+<h3 id="RabbitMQ"><a href="#RabbitMQ" class="headerlink" title="RabbitMQ"></a>RabbitMQ</h3><h4 id="五种消息模型"><a href="#五种消息模型" class="headerlink" title="五种消息模型"></a>五种消息模型</h4><ul>
+<li>只有队列<ul>
+<li>基本消息队列：RabbitMQ 中只有一个队列，生产者往队列中直接放消息，消费者从队列中不断地取消息（直到达到设置的预取上限或者队列为空），消费者在异步线程中消费消息。RabbitMQ 保证了同一个队列放操作和取操作的原子性。</li>
+<li>工作消息队列：和基本消息队列的区别就是消费者变成了两个，整个过程基本不变。当我们把预取设为 1 的时候（也就是取一条消息，消费一条消息），那么两个消费者取消息的速率和它们消费消息的速率成正比。预取上限需要在 yml 中配置 prefetch。</li>
+</ul>
+</li>
+<li>交换机+队列<br>交换机的作用是当有多个队列时，对于每个消息，决定将消息放到哪些队列中。从每个队列自己的角度出发，仍然只存在生产者放消息和消费者取消息的过程，和之前一样。<ul>
+<li>广播交换机（Fanout）：消息放入绑定的所有队列</li>
+<li>直连交换机（Direct）：根据绑定的 key 决定放入哪些队列</li>
+<li>主题交换机（Topic）：根据主题匹配决定放入哪些队列</li>
+</ul>
+</li>
+</ul>
+<h4 id="五大操作"><a href="#五大操作" class="headerlink" title="五大操作"></a>五大操作</h4><p>主要有五大操作：创建交换机、创建队列、绑定交换机和队列、生产消息、消费消息</p>
+<p>实现主要包括官方 maven 依赖原生实现、SpringAMQP 封装实现。AMQP 协议是一种基于 tcp 的专门用于应用程序间传递业务消息的标准（跨语言）。SpringAMQP 是 AMQP 协议在 Spring 框架中的实现，提供了 SpringBoot 自动装配。</p>
+<p>最后需要注意 AMQP 传输的是数据字节，如果要发送 java 对象的话则需要序列化。SpringAMQP 的默认序列化方式是 jdk 序列化，jdk 序列化效率比较低，可以换成 Json 序列化，Json 序列化先将 java 对象转换为字符串，然后把字符串编码发送，接受后先解码成字符串再反序列化成对象即可。</p>
+<h4 id="死信队列"><a href="#死信队列" class="headerlink" title="死信队列"></a>死信队列</h4><p>消息本身和队列都可以设置过期时间，达到两者的最小值时消息就会过期。</p>
+<p>可以为队列设置死信交换机，这样队列中出现的所有死信不会被丢弃而是转到死信交换机进行重新路由，消息变成死信有三种情况：</p>
+<ul>
+<li>消息过期</li>
+<li>队列达到最大长度，队头消息会变成死信</li>
+<li>开启了手动确认，但消费者拒绝消息或收到消息后不确认，此消息就会变成死信</li>
+</ul>
+<p>我们可以创建一个交换机，绑定一个队列，再为这个队列设置一个死信交换机，再为死信交换机绑定一个死信队列。</p>
+<h4 id="延迟队列"><a href="#延迟队列" class="headerlink" title="延迟队列"></a>延迟队列</h4><p>如果需要消息在延迟定长时间后被消费，可以通过死信队列来实现，设置队列的消息过期时间，然后再转到死信交换机，路由到死信队列，然后消费者消费死信队列即可。</p>
+<h4 id="Confirm-模式和-Return-模式"><a href="#Confirm-模式和-Return-模式" class="headerlink" title="Confirm 模式和 Return 模式"></a>Confirm 模式和 Return 模式</h4><p>生产者和消费者的消息确认功能，用来保证可靠性，保证消息不丢失（AMQP 基于 tcp，所以感觉确认功能没什么用）。</p>
+<h4 id="备用交换机"><a href="#备用交换机" class="headerlink" title="备用交换机"></a>备用交换机</h4><p>当消息经过交换器准备路由给队列的时候，发现没有对应的队列可以投递信息，在 rabbitmq 中会默认丢弃消息，如果我们想要监测一个交换机有哪些消息没有对应的队列，可以为这个交换机绑定一个备用交换机，然后设置消费者接收备用交换机的消息，记录到日志或发送报警信息。</p>
+<h4 id="消息幂等性"><a href="#消息幂等性" class="headerlink" title="消息幂等性"></a>消息幂等性</h4><p>消息幂等性是指对同一条消息的多次执行操作的结果与一次执行的结果相同。在分布式系统中，由于网络的不确定性，可能会导致消息被重复发送或者消息的顺序发生变化。为了确保系统的一致性，消息的处理需要具备幂等性。</p>
+<p>保证消息幂等性也就是保证消息不被重复消费，可以通过为每个消息设置全局唯一 ID 结合 redis 实现。</p>
+<h2 id="索引库-Elasticsearch"><a href="#索引库-Elasticsearch" class="headerlink" title="索引库 Elasticsearch"></a>索引库 Elasticsearch</h2><p>Elasticsearch 索引库和 mysql 等关系型数据库的存储模式类似，都是存储数据条目，也存在表、字段、增删改查等概念，但是在底层存储方式上有很大区别。相比而言，mysql 的优势在于擅长事务类型操作，可以确保数据的安全和一致性，而 Elasticsearch 的优势在于擅长海量数据的高效搜索。</p>
+<p>Elasticsearch 底层是基于 lucene 来实现的。Lucene 是 Apache 公司开发的一个 Java 语言的搜索引擎类库</p>
+<p>浏览器搜索、电商搜索、网站内部搜索等都是由 Elasticsearch 完成的。</p>
+<h3 id="倒排索引"><a href="#倒排索引" class="headerlink" title="倒排索引"></a>倒排索引</h3><p>倒排索引的概念是基于 MySQL 这样的正向索引而言的。在 mysql 数据库中，如果表中某个字段没有建立索引，那么按照字段值查找条目的操作需要扫描整张表，如果字段建立了索引，那么按照字段值查找条目的操作就非常快，但是如果是按照字段值模糊匹配来查找条目的话，仍然是需要全表扫描的。</p>
+<p>倒排索引可以解决这个问题。创建倒排索引的过程是对每一个条目的数据利用算法进行分词，然后建立分词到条目的映射。倒排索引建立完成后，每个分词都映射了所有包含这个分词的条目，当查询某句话时，首先对这句话进行分词，然后取所有分词对应条目集合的并集。因此我们可以以 O(1)的时间复杂度直接获取到所有和这句话有关的条目。</p>
+<p><strong>正向索引</strong>：</p>
+<ul>
+<li>优点：<ul>
+<li>可以给多个字段创建索引</li>
+<li>根据索引字段搜索、排序速度非常快</li>
+</ul>
+</li>
+<li>缺点：<ul>
+<li>根据非索引字段，或者索引字段中的部分词条查找时，只能全表扫描。</li>
+</ul>
+</li>
+</ul>
+<p><strong>倒排索引</strong>：</p>
+<ul>
+<li>优点：<ul>
+<li>根据词条搜索、模糊搜索时，速度非常快</li>
+</ul>
+</li>
+<li>缺点：<ul>
+<li>无法根据字段做排序</li>
+</ul>
+</li>
+</ul>
+<h3 id="Elasticsearch-和-Mysql"><a href="#Elasticsearch-和-Mysql" class="headerlink" title="Elasticsearch 和 Mysql"></a>Elasticsearch 和 Mysql</h3><p>Elasticsearch 中的条目是以 Json 格式存储的。</p>
+<table>
+<thead>
+<tr>
+<th><strong>MySQL</strong></th>
+<th><strong>Elasticsearch</strong></th>
+<th><strong>说明</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Table</td>
+<td>Index</td>
+<td>索引(index)，就是文档的集合，类似数据库的表(table)</td>
+</tr>
+<tr>
+<td>Row</td>
+<td>Document</td>
+<td>文档（Document），就是一条条的数据，类似数据库中的行（Row），文档都是 JSON 格式</td>
+</tr>
+<tr>
+<td>Column</td>
+<td>Field</td>
+<td>字段（Field），就是 JSON 文档中的字段，类似数据库中的列（Column）</td>
+</tr>
+<tr>
+<td>Schema</td>
+<td>Mapping</td>
+<td>Mapping（映射）是索引中文档的约束，例如字段类型约束。类似数据库的表结构（Schema）</td>
+</tr>
+<tr>
+<td>SQL</td>
+<td>DSL</td>
+<td>DSL 是 elasticsearch 提供的 JSON 风格的请求语句，用来操作 elasticsearch，实现 CRUD</td>
+</tr>
+</tbody></table>
+<p>在企业中，往往是两者结合使用：</p>
+<ul>
+<li>对安全性要求较高的写操作，使用 mysql 实现</li>
+<li>对查询性能要求较高的搜索需求，使用 elasticsearch 实现</li>
+<li>两者再基于某种方式，实现数据的同步，保证一致性</li>
+</ul>
+<h3 id="安装-Elasticsearch、kibana-和-ik-分词器"><a href="#安装-Elasticsearch、kibana-和-ik-分词器" class="headerlink" title="安装 Elasticsearch、kibana 和 ik 分词器"></a>安装 Elasticsearch、kibana 和 ik 分词器</h3><p>Elasticsearch、kibana 用 docker 部署即可，ik 分词器良好支持中文，有两种模式：</p>
+<ul>
+<li>ik_smart：智能切分，粗粒度</li>
+<li>ik_max_word：最细切分，细粒度</li>
+</ul>
+<p>ik 分词器支持拓展词条和停用词条，分词器分词是依照字典来完成的，那么一些字典中没有的词语（比如最新的网络用语），就需要拓展词条，一些敏感词语则需要停用词条。</p>
+<h3 id="Elasticsearch-常见操作"><a href="#Elasticsearch-常见操作" class="headerlink" title="Elasticsearch 常见操作"></a>Elasticsearch 常见操作</h3><p>mapping 是对索引库中文档的约束，常见的 mapping 属性包括：</p>
+<ul>
+<li>type：字段数据类型，常见的简单类型有：<ul>
+<li>字符串：text（可分词的文本）、keyword（精确值，例如：品牌、国家、ip 地址）</li>
+<li>数值：long、integer、short、byte、double、float、</li>
+<li>布尔：boolean</li>
+<li>日期：date</li>
+<li>对象：object</li>
+</ul>
+</li>
+<li>index：是否创建索引，默认为 true</li>
+<li>analyzer：使用哪种分词器</li>
+<li>properties：该字段的子字段</li>
+</ul>
+<h4 id="索引库-CRUD"><a href="#索引库-CRUD" class="headerlink" title="索引库 CRUD"></a>索引库 CRUD</h4><ul>
+<li>创建索引库：创建时需要想好以下几点<ul>
+<li>字段名</li>
+<li>字段数据类型</li>
+<li>是否参与搜索（或者说是否创建这个字段的倒排索引），需要根据业务来判断</li>
+<li>是否需要分词，内容如果是一个整体就无需分词，反之则要分词</li>
+<li>如果分词，分词器是什么？可以统一使用 ik_max_word</li>
+</ul>
+</li>
+<li>查询索引库</li>
+<li>修改索引库：修改索引库只允许新增字段到 mapping 中，不允许修改原有字段（因为会对已经建立好的倒排索引产生影响）</li>
+<li>删除索引库</li>
+</ul>
+<h4 id="文档-CRUD"><a href="#文档-CRUD" class="headerlink" title="文档 CRUD"></a>文档 CRUD</h4><ul>
+<li>新增文档</li>
+<li><strong>查询文档</strong>：后面详述</li>
+<li>删除文档</li>
+<li>修改文档：全量修改&#x2F;增量修改</li>
+</ul>
+<h4 id="ES-客户端"><a href="#ES-客户端" class="headerlink" title="ES 客户端"></a>ES 客户端</h4><p>ES 官方提供了各种不同语言的客户端，用来操作 ES。这些客户端的本质就是组装 DSL 语句，通过 http 请求发送给 ES。</p>
+<p>我们可以用 Java HighLevel Rest Client 客户端 API 来操作 ES，导入相关 maven 依赖后即可使用。RestClient 进行索引库 CRUD 和文档 CRUD 的具体方式可以查询笔记。</p>
+<h3 id="Elasticsearch-查询文档"><a href="#Elasticsearch-查询文档" class="headerlink" title="Elasticsearch 查询文档"></a>Elasticsearch 查询文档</h3><p>查询文档的 DSL 是一个大的 JSON 对象，包含下列属性：</p>
+<ul>
+<li>query：查询条件</li>
+<li>sort：排序条件</li>
+<li>from 和 size：分页条件</li>
+<li>highlight：高亮条件</li>
+</ul>
+<p>RestClient 查询文档的 api 接口类似于查询文档的 DSL，具体可查笔记。</p>
+<h4 id="查询条件"><a href="#查询条件" class="headerlink" title="查询条件"></a>查询条件</h4><ul>
+<li><p><strong>查询所有</strong>：查询出所有数据，match_all</p>
+</li>
+<li><p><strong>全文检索查询</strong>：利用分词器对用户输入内容分词，然后去倒排索引库中匹配。</p>
+<ul>
+<li>match_query：单字段</li>
+<li>multi_match_query：多字段</li>
+</ul>
+</li>
+<li><p><strong>精确查询</strong>：根据精确词条值查找数据，一般是查找 keyword、数值、日期、boolean 等类型字段。</p>
+<ul>
+<li>range：查找数值或日期的范围</li>
+<li>term：精准匹配 keyword、数值、日期和 boolean</li>
+</ul>
+</li>
+<li><p><strong>地理（geo）查询</strong>：根据经纬度查询。</p>
+<ul>
+<li>geo_distance：查半径范围内</li>
+<li>geo_bounding_box：查矩形范围内</li>
+</ul>
+</li>
+<li><p><strong>复合（compound）查询</strong>：复合查询可以将上述各种查询条件组合起来，合并查询条件。</p>
+<ul>
+<li>bool：条件复合</li>
+<li>function_score：如果我们没有制定排序顺序的话，ES 会对满足条件的所有文档按照相关度函数进行算分，打分高的文档排在前面。function_score 可以调整一些特定文档的算分，比如提高广告文档的排名。</li>
+</ul>
+</li>
+</ul>
+<h4 id="结果排序"><a href="#结果排序" class="headerlink" title="结果排序"></a>结果排序</h4><p>elasticsearch 默认是根据相关度算分排序，但也可以自己指定排序。</p>
+<h4 id="结果分页"><a href="#结果分页" class="headerlink" title="结果分页"></a>结果分页</h4><p>elasticsearch 默认情况下只返回 top10 的数据，修改 from、size 参数可以控制要返回的分页，类似于 mysql 中的 limit。</p>
+<h4 id="关键字高亮"><a href="#关键字高亮" class="headerlink" title="关键字高亮"></a>关键字高亮</h4><p>对于查询结果中所有匹配的关键字进行高亮显示，实现方式是给文档中的所有关键字都添加一个标签，例如<code>&lt;em&gt;</code>标签。前端可以给<code>&lt;em&gt;</code>标签编写 CSS 样式来高亮。</p>
+<h3 id="数据聚合"><a href="#数据聚合" class="headerlink" title="数据聚合"></a>数据聚合</h3><p>elasticsearch 的数据聚合和 mysql 的数据聚合功能类似，但是速度更快。</p>
+<p>聚合常见的有三类：</p>
+<ul>
+<li><p><strong>桶（Bucket）</strong>聚合：用来对文档做分组</p>
+<ul>
+<li>TermAggregation：按照文档字段值分组，例如按照品牌值分组、按照国家分组</li>
+<li>Date Histogram：按照日期阶梯分组，例如一周为一组，或者一月为一组</li>
+</ul>
+</li>
+<li><p><strong>度量（Metric）</strong>聚合：用以计算一些值</p>
+<ul>
+<li>Avg：求平均值</li>
+<li>Max：求最大值</li>
+<li>Min：求最小值</li>
+<li>Stats：同时求 max、min、avg、sum 等</li>
+</ul>
+</li>
+</ul>
+<p>默认情况下，Bucket 聚合是对索引库的所有文档做聚合，但真实情况下往往是对搜索结果进行聚合。</p>
+<h3 id="自动补全"><a href="#自动补全" class="headerlink" title="自动补全"></a>自动补全</h3><p>当我们在搜索框中输入一些文字时，会显示一些自动补全文字。</p>
+<p>elasticsearch 提供了 Completion Suggester 查询来实现自动补全功能。这个查询会匹配以用户输入内容开头的词条并返回。为了提高补全查询的效率，对于文档中字段的类型有一些约束：</p>
+<ul>
+<li>参与补全查询的字段必须是 completion 类型。</li>
+<li>字段的内容一般是用来补全的多个词条形成的数组。</li>
+</ul>
+<p>如果希望能根据字母提示中文汉字的话，需要安装拼音分词器，然后自定义分词器，先用 ik 分词器进行分词，对于每个分出来的词语，在用拼音分词器进行分词。</p>
+<h3 id="数据同步"><a href="#数据同步" class="headerlink" title="数据同步"></a>数据同步</h3><p>当 mysql 数据库发生增删改时，elasticsearch 也必须跟着进行增删改。</p>
+<p>常见的数据同步方案有三种：</p>
+<ul>
+<li>同步调用：微服务 A 增删改 mysql 之后，马上调用微服务 B 的接口对 elasticsearch 进行相应的增删改。</li>
+<li>异步通知：微服务 A 增删改 mysql 之后，发送一个 MQ 消息，微服务 B 持续消费消息对 elasticsearch 进行相应的增删改。</li>
+<li>监听 binlog：mysql 开启 binlog 功能，canal 监听 binlog 变化，实时更新 elasticsearch 中的内容。</li>
+</ul>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/notes/tags/%E5%85%AB%E8%82%A1%E6%96%87/" class="print-no-link">#八股文</a>
+      
+        <a href="/notes/tags/SpringCloud/" class="print-no-link">#SpringCloud</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>SpringCloud总结</div>
+      <div>https://howard1209a.github.io/notes/2023/11/23/总结篇 SpringCloud总结 /</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>howard1209a</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2023年11月23日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/notes/2023/11/24/%E5%85%AB%E8%82%A1%E7%AF%87%20%E6%B5%8F%E8%A7%88%E5%99%A8%E8%B7%A8%E5%9F%9F%E9%97%AE%E9%A2%98%20/" title="浏览器跨域问题">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">浏览器跨域问题</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/notes/2023/11/21/%E9%9A%8F%E7%AC%94%E7%AF%87%20%E5%B0%86%20wsl%20%E9%85%8D%E7%BD%AE%E4%B8%BA%E5%B1%80%E5%9F%9F%E7%BD%91%E6%9C%8D%E5%8A%A1%E5%99%A8/" title="将 wsl 配置为局域网服务器">
+                        <span class="hidden-mobile">将 wsl 配置为局域网服务器</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/notes/js/events.js" ></script>
+<script  src="/notes/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/notes/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/notes/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/notes/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

@@ -1,0 +1,909 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/notes/img/fluid.png">
+  <link rel="icon" href="/notes/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="howard1209a">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="高级分布式系统第一章 绪论 什么是分布式系统 分布式系统的优势 分布式系统的特征 分布式系统扩展方式 衡量性能的常用指标 分布式系统中的典型问题 分布式系统模型 网络分区与脑裂 事务 ACID&#x2F;CAP&#x2F;BASE 分布式计算  第二章 进程线程及客户服务器 进程 线程 IO 模型 阻塞式 IO 模型 非阻塞式 IO 模型 信号驱动式 IO 模型 复用式 IO 模型 异步式 IO">
+<meta property="og:type" content="article">
+<meta property="og:title" content="高级分布式系统">
+<meta property="og:url" content="https://howard1209a.github.io/notes/2023/12/14/%E9%9A%8F%E7%AC%94%E7%AF%87%20%E9%AB%98%E7%BA%A7%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F%20/index.html">
+<meta property="og:site_name" content="笔记">
+<meta property="og:description" content="高级分布式系统第一章 绪论 什么是分布式系统 分布式系统的优势 分布式系统的特征 分布式系统扩展方式 衡量性能的常用指标 分布式系统中的典型问题 分布式系统模型 网络分区与脑裂 事务 ACID&#x2F;CAP&#x2F;BASE 分布式计算  第二章 进程线程及客户服务器 进程 线程 IO 模型 阻塞式 IO 模型 非阻塞式 IO 模型 信号驱动式 IO 模型 复用式 IO 模型 异步式 IO">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-12-14T11:21:47.000Z">
+<meta property="article:modified_time" content="2024-03-28T08:09:47.442Z">
+<meta property="article:author" content="howard1209a">
+<meta property="article:tag" content="八股文">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>高级分布式系统 - 笔记</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/notes/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/notes/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/notes/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"howard1209a.github.io","root":"/notes/","version":"1.9.5","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/notes/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/notes/js/utils.js" ></script>
+  <script  src="/notes/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/notes/">
+      <strong>howard1209a</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/notes/">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/notes/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/notes/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/notes/about/">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/notes/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="高级分布式系统"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2023-12-14 19:21" pubdate>
+          2023年12月14日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          1.8k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          15 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">高级分布式系统</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="高级分布式系统"><a href="#高级分布式系统" class="headerlink" title="高级分布式系统"></a>高级分布式系统</h1><h2 id="第一章-绪论"><a href="#第一章-绪论" class="headerlink" title="第一章 绪论"></a>第一章 绪论</h2><ul>
+<li>什么是分布式系统</li>
+<li>分布式系统的优势</li>
+<li>分布式系统的特征</li>
+<li>分布式系统扩展方式</li>
+<li>衡量性能的常用指标</li>
+<li>分布式系统中的典型问题</li>
+<li>分布式系统模型</li>
+<li>网络分区与脑裂</li>
+<li>事务</li>
+<li>ACID&#x2F;CAP&#x2F;BASE</li>
+<li>分布式计算</li>
+</ul>
+<h2 id="第二章-进程线程及客户服务器"><a href="#第二章-进程线程及客户服务器" class="headerlink" title="第二章 进程线程及客户服务器"></a>第二章 进程线程及客户服务器</h2><ul>
+<li>进程</li>
+<li>线程</li>
+<li>IO 模型<ul>
+<li>阻塞式 IO 模型</li>
+<li>非阻塞式 IO 模型</li>
+<li>信号驱动式 IO 模型</li>
+<li>复用式 IO 模型</li>
+<li>异步式 IO 模型</li>
+</ul>
+</li>
+<li>服务器<ul>
+<li>并发服务器&#x2F;迭代服务器</li>
+<li>客户和服务器的联系</li>
+<li>服务器状态问题</li>
+</ul>
+</li>
+<li>服务器集群<ul>
+<li>无状态服务的节点集群</li>
+<li>有状态服务的节点集群<ul>
+<li>单一服务节点集群</li>
+<li>信息共享的节点集群</li>
+<li>信息一致的节点集群</li>
+</ul>
+</li>
+<li>负载均衡</li>
+<li>正向&#x2F;反向&#x2F;透明代理</li>
+</ul>
+</li>
+</ul>
+<h2 id="第三章-通信"><a href="#第三章-通信" class="headerlink" title="第三章 通信"></a>第三章 通信</h2><ul>
+<li>分层通信协议<ul>
+<li>OSI 模型</li>
+<li>中间件协议<ul>
+<li>持久通信&#x2F;瞬时通信</li>
+<li>同步通信&#x2F;异步通信</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>套接字</li>
+<li>HTTP 协议</li>
+<li>远程过程调用 RPC</li>
+<li>REST 风格</li>
+<li>面向消息通信<ul>
+<li>面向消息的瞬时通信：MPI</li>
+<li>面向消息的持久通信：Kafka</li>
+</ul>
+</li>
+<li>面向流的通信</li>
+<li>多播通信</li>
+</ul>
+<h2 id="第四章-体系结构"><a href="#第四章-体系结构" class="headerlink" title="第四章 体系结构"></a>第四章 体系结构</h2><ul>
+<li>软件体系结构</li>
+<li>体系结构样式<ul>
+<li>分层体系结构</li>
+<li>基于对象的体系结构</li>
+<li>以资源为中心的体系结构</li>
+<li>基于事件的体系结构</li>
+</ul>
+</li>
+<li>系统体系结构<ul>
+<li>集中式体系结构</li>
+<li>P2P 体系结构</li>
+<li>混合型体系结构</li>
+</ul>
+</li>
+<li>体系结构与中间件</li>
+<li>分布式系统服务架构演进<ul>
+<li>原始分布式时代</li>
+<li>基于对象的体系结构</li>
+<li>基于构件的体系结构<ul>
+<li>ORM</li>
+<li>重量级框架 EJB</li>
+<li>轻量级框架 Spring，控制反转，依赖注入</li>
+</ul>
+</li>
+<li>面向服务的体系结构 SOA</li>
+<li>REST 风格的体系结构</li>
+<li>微服务体系结构<ul>
+<li>Dubbo</li>
+<li>Spring Cloud</li>
+</ul>
+</li>
+<li>Serverless 体系结构</li>
+</ul>
+</li>
+</ul>
+<h2 id="第五章-命名"><a href="#第五章-命名" class="headerlink" title="第五章 命名"></a>第五章 命名</h2><ul>
+<li>实体</li>
+<li>实体命名方法</li>
+<li>命名系统</li>
+<li>无结构命名&#x2F;结构化命名</li>
+<li>DNS 域名解析<ul>
+<li>迭代式域名解析</li>
+<li>递归式域名解析</li>
+</ul>
+</li>
+</ul>
+<h2 id="第六章-容错"><a href="#第六章-容错" class="headerlink" title="第六章 容错"></a>第六章 容错</h2><ul>
+<li>分布式容错模型<ul>
+<li>可靠&#x2F;可信系统</li>
+<li>失效&#x2F;差错&#x2F;故障</li>
+<li>进程失效分类</li>
+<li>进程崩溃的发现</li>
+<li>基于冗余的失效屏蔽</li>
+</ul>
+</li>
+<li>RPC 失效的五种情况</li>
+<li>进程恢复<ul>
+<li>进程复制</li>
+<li>协定与共识<ul>
+<li>拜占庭失效</li>
+<li>拜占庭容错</li>
+</ul>
+</li>
+<li>失效检测</li>
+</ul>
+</li>
+<li>可靠分组通信<ul>
+<li>可靠多播</li>
+<li>原子多播</li>
+</ul>
+</li>
+<li>恢复处理<ul>
+<li>向前&#x2F;向后恢复</li>
+<li>检查点</li>
+<li>消息日志</li>
+</ul>
+</li>
+</ul>
+<h2 id="第八章-事务与并发控制"><a href="#第八章-事务与并发控制" class="headerlink" title="第八章 事务与并发控制"></a>第八章 事务与并发控制</h2><ul>
+<li>事务基本概念<ul>
+<li>ACID</li>
+<li>事务隔离级别<ul>
+<li>脏读&#x2F;不可重复读&#x2F;幻读</li>
+<li>读未提交&#x2F;读已提交&#x2F;可重复读&#x2F;可串行化</li>
+</ul>
+</li>
+<li>事务饥饿</li>
+<li>分布式事务</li>
+</ul>
+</li>
+<li>分布式事务提交<ul>
+<li>单阶段协议</li>
+<li>两阶段提交协议</li>
+<li>三阶段提交协议</li>
+</ul>
+</li>
+<li>事务并发控制<ul>
+<li>什么是冲突操作</li>
+<li>串行等价性</li>
+<li>并发控制协议<ul>
+<li>两阶段锁协议<ul>
+<li>死锁解决方案</li>
+<li>分布式死锁解决方案</li>
+</ul>
+</li>
+<li>乐观并发控制协议</li>
+<li>时间戳排序协议</li>
+<li>三种协议比较</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="第九章-复制与一致性"><a href="#第九章-复制与一致性" class="headerlink" title="第九章 复制与一致性"></a>第九章 复制与一致性</h2><ul>
+<li>复制管理</li>
+<li>一致性模型<ul>
+<li>以数据为中心的一致性模型<ul>
+<li>顺序一致性</li>
+<li>线性一致性</li>
+<li>因果一致性</li>
+<li>最终一致性</li>
+</ul>
+</li>
+<li>以客户为中心的一致性模型</li>
+</ul>
+</li>
+<li>一致性协议<ul>
+<li>基于主备的协议<ul>
+<li>同步复制&#x2F;异步复制</li>
+<li>节点失效</li>
+</ul>
+</li>
+<li>复制写协议<ul>
+<li>主动复制</li>
+<li>基于多数表决的协议</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="第十章-协调与协定"><a href="#第十章-协调与协定" class="headerlink" title="第十章 协调与协定"></a>第十章 协调与协定</h2><ul>
+<li>Lamport 逻辑时钟</li>
+<li>分布式互斥<ul>
+<li>中央服务器算法</li>
+<li>基于环的算法</li>
+</ul>
+</li>
+<li>选举<ul>
+<li>基于环的选举算法</li>
+<li>霸道 Bully 算法</li>
+</ul>
+</li>
+<li>共识<ul>
+<li>非拜占庭容错类算法</li>
+<li>拜占庭容错类算法</li>
+<li>Paxos 算法</li>
+<li>PBFT 算法</li>
+<li>Pow 算法</li>
+</ul>
+</li>
+<li>Zookeeper<ul>
+<li>Zookeeper 的应用<ul>
+<li>基于数据发布订阅的配置管理</li>
+<li>Master 选举</li>
+<li>Kafka</li>
+</ul>
+</li>
+<li>Zookeeper 原理<ul>
+<li>Zookeeper 的基本需求</li>
+<li>Zookeeper 集群中的角色</li>
+<li>Zookeeper 集群中服务器的状态</li>
+</ul>
+</li>
+<li>Zab 协议</li>
+</ul>
+</li>
+</ul>
+<h2 id="第十一章-分布式文件系统"><a href="#第十一章-分布式文件系统" class="headerlink" title="第十一章 分布式文件系统"></a>第十一章 分布式文件系统</h2><ul>
+<li>基本概念</li>
+<li>体系结构<ul>
+<li>CS 体系结构</li>
+<li>基于集群的体系结构</li>
+<li>对称式体系结构</li>
+</ul>
+</li>
+<li>GoogleFS</li>
+</ul>
+<h2 id="第十二章-分布式数据管理系统"><a href="#第十二章-分布式数据管理系统" class="headerlink" title="第十二章 分布式数据管理系统"></a>第十二章 分布式数据管理系统</h2><ul>
+<li>关系型数据库</li>
+<li>NoSQL 数据库</li>
+<li>NewSQL 数据库</li>
+<li>Redis<ul>
+<li>Redis 事务</li>
+<li>Redis 持久化<ul>
+<li>基于全量模式的持久化</li>
+<li>基于增量模式的持久化</li>
+</ul>
+</li>
+<li>复制副本</li>
+<li>Redis 集群功能实现</li>
+</ul>
+</li>
+<li>Google Spanner</li>
+</ul>
+<h2 id="第十三章-分布式数据处理技术"><a href="#第十三章-分布式数据处理技术" class="headerlink" title="第十三章 分布式数据处理技术"></a>第十三章 分布式数据处理技术</h2><ul>
+<li>静态数据&#x2F;流数据</li>
+<li>批量计算&#x2F;实时计算</li>
+<li>MapReduce</li>
+<li>Spark</li>
+<li>Storm</li>
+</ul>
+<h2 id="第十五章-云计算"><a href="#第十五章-云计算" class="headerlink" title="第十五章 云计算"></a>第十五章 云计算</h2><ul>
+<li>云计算基本概念</li>
+<li>云计算的三种服务模式<ul>
+<li>SaaS</li>
+<li>PaaS</li>
+<li>IaaS</li>
+</ul>
+</li>
+<li>虚拟化技术<ul>
+<li>虚拟机技术</li>
+<li>容器技术</li>
+</ul>
+</li>
+<li>Kubernetes</li>
+<li>云原生</li>
+</ul>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p>顺序一致性：<a target="_blank" rel="noopener" href="https://lotabout.me/2019/QQA-What-is-Sequential-Consistency/">https://lotabout.me/2019/QQA-What-is-Sequential-Consistency/</a></p>
+<p>Zookeeper：</p>
+<p><a target="_blank" rel="noopener" href="https://www.douban.com/note/208430424/?_i=2804776XBx1W5J">https://www.douban.com/note/208430424/?_i=2804776XBx1W5J</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/cnh294141800/article/details/53768464">https://blog.csdn.net/cnh294141800/article/details/53768464</a></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/notes/tags/%E5%85%AB%E8%82%A1%E6%96%87/" class="print-no-link">#八股文</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>高级分布式系统</div>
+      <div>https://howard1209a.github.io/notes/2023/12/14/随笔篇 高级分布式系统 /</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>howard1209a</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2023年12月14日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/notes/2024/01/08/%E6%80%BB%E7%BB%93%E7%AF%87%20Mysql%E6%80%BB%E7%BB%93/" title="Mysql总结">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Mysql总结</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/notes/2023/12/11/%E5%85%AB%E8%82%A1%E7%AF%87%20Java%E8%87%AA%E9%99%90%E5%AE%9A%E6%B3%9B%E5%9E%8B%E8%AF%A6%E8%A7%A3/" title="Java自限定泛型详解">
+                        <span class="hidden-mobile">Java自限定泛型详解</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/notes/js/events.js" ></script>
+<script  src="/notes/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/notes/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/notes/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/notes/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

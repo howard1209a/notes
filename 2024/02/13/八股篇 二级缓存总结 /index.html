@@ -1,0 +1,655 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/notes/img/fluid.png">
+  <link rel="icon" href="/notes/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="howard1209a">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="二级缓存总结正确的二级缓存方式首先需要说明的是，二级缓存的增删改查如果上互斥锁的话，将完全保证数据一致性，但是会极大影响效率，所以我们一般不会上锁，而是采用以下的方式 增在数据库中增加相应条目，此前数据库中一定是没有这些条目的，否则会报异常 删先删除数据库中相应条目，再删除缓存中相应条目，此前数据库中可能有这些条目，也可能没有这些条目，并不影响 改先修改数据库中相应条目，再删除缓存中相应条目，此前">
+<meta property="og:type" content="article">
+<meta property="og:title" content="二级缓存总结">
+<meta property="og:url" content="https://howard1209a.github.io/notes/2024/02/13/%E5%85%AB%E8%82%A1%E7%AF%87%20%E4%BA%8C%E7%BA%A7%E7%BC%93%E5%AD%98%E6%80%BB%E7%BB%93%20/index.html">
+<meta property="og:site_name" content="笔记">
+<meta property="og:description" content="二级缓存总结正确的二级缓存方式首先需要说明的是，二级缓存的增删改查如果上互斥锁的话，将完全保证数据一致性，但是会极大影响效率，所以我们一般不会上锁，而是采用以下的方式 增在数据库中增加相应条目，此前数据库中一定是没有这些条目的，否则会报异常 删先删除数据库中相应条目，再删除缓存中相应条目，此前数据库中可能有这些条目，也可能没有这些条目，并不影响 改先修改数据库中相应条目，再删除缓存中相应条目，此前">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240214143806.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240214144903.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240214151609.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240214154830.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240214155219.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240214155336.png">
+<meta property="article:published_time" content="2024-02-13T14:56:17.000Z">
+<meta property="article:modified_time" content="2024-03-28T08:09:47.438Z">
+<meta property="article:author" content="howard1209a">
+<meta property="article:tag" content="八股文">
+<meta property="article:tag" content="Java">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240214143806.png">
+  
+  
+  
+  <title>二级缓存总结 - 笔记</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/notes/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/notes/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/notes/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"howard1209a.github.io","root":"/notes/","version":"1.9.5","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/notes/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/notes/js/utils.js" ></script>
+  <script  src="/notes/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/notes/">
+      <strong>howard1209a</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/notes/">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/notes/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/notes/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/notes/about/">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/notes/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="二级缓存总结"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2024-02-13 22:56" pubdate>
+          2024年2月13日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          1.5k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          13 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">二级缓存总结</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="二级缓存总结"><a href="#二级缓存总结" class="headerlink" title="二级缓存总结"></a>二级缓存总结</h1><h2 id="正确的二级缓存方式"><a href="#正确的二级缓存方式" class="headerlink" title="正确的二级缓存方式"></a>正确的二级缓存方式</h2><p>首先需要说明的是，二级缓存的增删改查如果上互斥锁的话，将完全保证数据一致性，但是会极大影响效率，所以我们一般不会上锁，而是采用以下的方式</p>
+<h3 id="增"><a href="#增" class="headerlink" title="增"></a>增</h3><p>在数据库中增加相应条目，此前数据库中一定是没有这些条目的，否则会报异常</p>
+<h3 id="删"><a href="#删" class="headerlink" title="删"></a>删</h3><p>先删除数据库中相应条目，再删除缓存中相应条目，此前数据库中可能有这些条目，也可能没有这些条目，并不影响</p>
+<h3 id="改"><a href="#改" class="headerlink" title="改"></a>改</h3><p>先修改数据库中相应条目，再删除缓存中相应条目，此前数据库中可能有这些条目，也可能没有这些条目，并不影响</p>
+<h3 id="查"><a href="#查" class="headerlink" title="查"></a>查</h3><p>先查缓存，如果有数据就直接返回，如果没有数据就查数据库，如果没有数据就返回空，有数据的话存入缓存后返回，此前数据库中可能有这些条目，也可能没有这些条目，并不影响</p>
+<h2 id="并发数据一致性分析"><a href="#并发数据一致性分析" class="headerlink" title="并发数据一致性分析"></a>并发数据一致性分析</h2><p>那么为什么上述的增删改查方式几乎不会出现数据一致性问题呢？首先需要明确几点</p>
+<ol>
+<li>数据库保证了关于相同条目操作的原子性</li>
+<li>缓存保证了关于相同条目操作的原子性</li>
+<li>前后两个操作之间存在顺序性，比如改操作，先改数据库再删缓存</li>
+<li>数据库的读写时间远远长于缓存的读写时间</li>
+</ol>
+<p>下面是四种操作的时序图，其中查询只考虑了缓存没查到的情况，因为缓存查到了就会直接返回，并不会带来数据一致性问题<br><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240214143806.png" srcset="/notes/img/loading.gif" lazyload></p>
+<p>首先明确如下两种情况是结果等价的，比如我们把改和查 2 放在一起，其中改操作的第一步修改数据库操作完成后，根据顺序性，当前线程下一步的删除缓存开始执行，根据原子性，另一个线程的查询数据库开始执行。由于数据库的读写时间远远长于缓存的读写时间，所以可以等价于先执行删除缓存，再执行查询数据库，这在结果上是一样的。即结果等价于改和查 2 是串行执行的。<br><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240214144903.png" srcset="/notes/img/loading.gif" lazyload></p>
+<p>接下来考虑增、删、改、查 1、查 2 这几种操作的任意并发情况，其实从结果上来看等价于所有操作都是串行执行的，因此不会出现数据库和缓存之间的数据一致性问题。</p>
+<p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240214151609.png" srcset="/notes/img/loading.gif" lazyload></p>
+<h2 id="一些额外的操作"><a href="#一些额外的操作" class="headerlink" title="一些额外的操作"></a>一些额外的操作</h2><p>上面我们已经证明了正确的增删改查操作不会带来并发数据一致性问题，然而有时我们会有一些额外的操作，这些操作也是不会带来数据一致性问题的。</p>
+<h3 id="手动缓存失效或超时缓存失效"><a href="#手动缓存失效或超时缓存失效" class="headerlink" title="手动缓存失效或超时缓存失效"></a>手动缓存失效或超时缓存失效</h3><p>比如我们设置一个接口，让相应缓存条目失效，或者设置缓存本身的超时失效。</p>
+<h3 id="读缓存"><a href="#读缓存" class="headerlink" title="读缓存"></a>读缓存</h3><p>比如我们设置一个接口，读缓存中的相应条目，或查操作本身第一步就是读缓存。</p>
+<h2 id="为什么先改再删而不是先删再改"><a href="#为什么先改再删而不是先删再改" class="headerlink" title="为什么先改再删而不是先删再改"></a>为什么先改再删而不是先删再改</h2><p>之所以先改再删是为了将耗时长的数据库读写操作放在前面，将耗时短的缓存读写操作放在后面，这样才能保证串行等价性。</p>
+<p>而如果先删再改的话，就有可能出现一方包裹另一方或者交替执行的非串行执行方式，如下图所示<br><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240214154830.png" srcset="/notes/img/loading.gif" lazyload></p>
+<h3 id="先删再改并发问题实例"><a href="#先删再改并发问题实例" class="headerlink" title="先删再改并发问题实例"></a>先删再改并发问题实例</h3><p>下面这种情况很容易发生<br><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240214155219.png" srcset="/notes/img/loading.gif" lazyload></p>
+<h3 id="先改再删并发问题实例"><a href="#先改再删并发问题实例" class="headerlink" title="先改再删并发问题实例"></a>先改再删并发问题实例</h3><p>下面这种情况几乎不可能发生<br><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240214155336.png" srcset="/notes/img/loading.gif" lazyload></p>
+<h2 id="为什么删除缓存而不是更新缓存"><a href="#为什么删除缓存而不是更新缓存" class="headerlink" title="为什么删除缓存而不是更新缓存"></a>为什么删除缓存而不是更新缓存</h2><p>删除一个数据，相比更新一个数据更加轻量级，操作执行的更快，因此出现数据一致性问题的概率更小。从另外一个角度来看，删除缓存也可以及时清理掉不频繁访问的缓存。</p>
+<h2 id="超时缓存失效的兜底方案"><a href="#超时缓存失效的兜底方案" class="headerlink" title="超时缓存失效的兜底方案"></a>超时缓存失效的兜底方案</h2><p>无论任何时候，我们都不保证二级缓存百分百的一致性，先改再删的小概率事件、程序异常等原因都可能造成二级缓存的数据一致性问题，而前面也已经说明了手动或自动的缓存失效并不会对二级缓存带来问题，所以我们可以定期地手动清除缓存，或者设置超时缓存失效来兜底，这样即使出现了数据不一致的情况，也能在一段时间后恢复一致。</p>
+<h2 id="删除缓存失败的解决办法"><a href="#删除缓存失败的解决办法" class="headerlink" title="删除缓存失败的解决办法"></a>删除缓存失败的解决办法</h2><p>比如在数据库和缓存都有值的情况下进行改操作，先改数据库，成功了，然后删除缓存失败了，此时缓存中就一直是旧值了。</p>
+<p>解决方法有两种</p>
+<ul>
+<li>重试机制。</li>
+<li>订阅 MySQL binlog，再操作缓存</li>
+</ul>
+<h3 id="重试机制"><a href="#重试机制" class="headerlink" title="重试机制"></a>重试机制</h3><p>本质是当删除缓存失败的时候，不断地重试，因为删除缓存失败本来就是小概率事件，所以几次重试几乎可以认为一定成功。</p>
+<p>可以利用消息队列完成，之前是修改数据库后直接删除缓存，现在是修改数据库后就生产一条消息到 mq 中，由消费者消费这条消息并删除缓存，如果消费者删除缓存失败，就重新获取消息进行重试。</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/notes/tags/%E5%85%AB%E8%82%A1%E6%96%87/" class="print-no-link">#八股文</a>
+      
+        <a href="/notes/tags/Java/" class="print-no-link">#Java</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>二级缓存总结</div>
+      <div>https://howard1209a.github.io/notes/2024/02/13/八股篇 二级缓存总结 /</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>howard1209a</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2024年2月13日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/notes/2024/02/22/%E9%A1%B9%E7%9B%AE%E7%AF%87%20EBed%E5%9B%BE%E5%BA%8A%E7%BD%91%E7%AB%99%20/" title="EBed图床网站">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">EBed图床网站</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/notes/2024/02/05/%E6%80%BB%E7%BB%93%E7%AF%87%20JVM%E6%80%BB%E7%BB%93/" title="JVM总结">
+                        <span class="hidden-mobile">JVM总结</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/notes/js/events.js" ></script>
+<script  src="/notes/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/notes/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/notes/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/notes/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

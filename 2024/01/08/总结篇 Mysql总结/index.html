@@ -1,0 +1,936 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/notes/img/fluid.png">
+  <link rel="icon" href="/notes/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="howard1209a">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="Mysql 总结基础篇Mysql 的一条语句是如何执行的 Server 层是上层，负责建立连接、分析和执行 SQL。底层存储引擎层负责数据的存储和提取，支持 InnoDB（默认存储引擎）、MyISAM、Memory 等多个存储引擎。  客户端与 server 层建立 tcp 连接并校验用户名密码 对传过来的 sql 进行解析，词法分析识别关键词，语法分析构建语法树。 预处理 sql，检查表和字段是">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Mysql总结">
+<meta property="og:url" content="https://howard1209a.github.io/notes/2024/01/08/%E6%80%BB%E7%BB%93%E7%AF%87%20Mysql%E6%80%BB%E7%BB%93/index.html">
+<meta property="og:site_name" content="笔记">
+<meta property="og:description" content="Mysql 总结基础篇Mysql 的一条语句是如何执行的 Server 层是上层，负责建立连接、分析和执行 SQL。底层存储引擎层负责数据的存储和提取，支持 InnoDB（默认存储引擎）、MyISAM、Memory 等多个存储引擎。  客户端与 server 层建立 tcp 连接并校验用户名密码 对传过来的 sql 进行解析，词法分析识别关键词，语法分析构建语法树。 预处理 sql，检查表和字段是">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240317093516.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240317094400.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240317095333.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240317102558.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240317103104.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240317142341.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240317151626.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240317221540.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240318201101.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240318202103.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240318205141.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240318213242.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240318213628.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240318214006.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240318223432.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240319095821.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240319095839.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240319095914.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240320094603.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240320095533.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240320103527.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240320105629.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240320110858.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240321091950.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240321095420.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240321104933.png">
+<meta property="article:published_time" content="2024-01-08T01:41:54.000Z">
+<meta property="article:modified_time" content="2024-03-28T08:09:47.438Z">
+<meta property="article:author" content="howard1209a">
+<meta property="article:tag" content="八股文">
+<meta property="article:tag" content="Mysql">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240317093516.png">
+  
+  
+  
+  <title>Mysql总结 - 笔记</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/notes/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/notes/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/notes/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"howard1209a.github.io","root":"/notes/","version":"1.9.5","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/notes/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/notes/js/utils.js" ></script>
+  <script  src="/notes/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/notes/">
+      <strong>howard1209a</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/notes/">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/notes/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/notes/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/notes/about/">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/notes/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Mysql总结"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2024-01-08 09:41" pubdate>
+          2024年1月8日 上午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          13k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          105 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">Mysql总结</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="Mysql-总结"><a href="#Mysql-总结" class="headerlink" title="Mysql 总结"></a>Mysql 总结</h1><h2 id="基础篇"><a href="#基础篇" class="headerlink" title="基础篇"></a>基础篇</h2><h3 id="Mysql-的一条语句是如何执行的"><a href="#Mysql-的一条语句是如何执行的" class="headerlink" title="Mysql 的一条语句是如何执行的"></a>Mysql 的一条语句是如何执行的</h3><p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240317093516.png" srcset="/notes/img/loading.gif" lazyload></p>
+<p>Server 层是上层，负责建立连接、分析和执行 SQL。底层存储引擎层负责数据的存储和提取，支持 <strong>InnoDB（默认存储引擎）</strong>、MyISAM、Memory 等多个存储引擎。</p>
+<ol>
+<li>客户端与 server 层建立 tcp 连接并校验用户名密码</li>
+<li>对传过来的 sql 进行解析，词法分析识别关键词，语法分析构建语法树。<br><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240317094400.png" srcset="/notes/img/loading.gif" lazyload></li>
+<li>预处理 sql，检查表和字段是否存在，将 <code>select *</code>中的<code>*</code>扩展为全部字段</li>
+<li>确定 SQL 语句的执行计划，比如当有多个索引的时候，基于查询成本的考虑来决定选择使用哪个索引，我们可以在查询语句最前面加个 <code>explain</code> 命令来输出本条 sql 的执行计划。<br><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240317095333.png" srcset="/notes/img/loading.gif" lazyload></li>
+<li>执行 sql，下面举几个例子</li>
+</ol>
+<ul>
+<li>主键等值：把条件交给存储引擎，存储引擎直接返回一条</li>
+<li>全表扫描：存储引擎返回第一条记录，执行器判断并返回客户端，存储引擎返回下一条记录</li>
+</ul>
+<h3 id="Mysql-一行记录是如何存储的"><a href="#Mysql-一行记录是如何存储的" class="headerlink" title="Mysql 一行记录是如何存储的"></a>Mysql 一行记录是如何存储的</h3><h4 id="数据存储在哪个文件"><a href="#数据存储在哪个文件" class="headerlink" title="数据存储在哪个文件"></a>数据存储在哪个文件</h4><p>每一个数据库有一个文件夹，当我们给这个数据库创建一个 t_order 表的时候，文件夹中会存在三个文件</p>
+<ul>
+<li>db.opt：用来存储当前数据库的默认字符集和字符校验规则。</li>
+<li>t_order.frm：存放表结构</li>
+<li>t_order.ibd：存放表数据</li>
+</ul>
+<h4 id="表空间文件的结构是怎么样的"><a href="#表空间文件的结构是怎么样的" class="headerlink" title="表空间文件的结构是怎么样的"></a>表空间文件的结构是怎么样的</h4><p>InnoDB 存储引擎的逻辑存储结构大致如下图：<br><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240317102558.png" srcset="/notes/img/loading.gif" lazyload></p>
+<ul>
+<li>页是 InnoDB 存储引擎磁盘管理的最小单元，页的大小固定 16KB。数据库每次读写都是以 16KB 为单位的，一次最少从磁盘中读取 16K 的内容到内存中，一次最少把内存中的 16K 内容刷新到磁盘中。</li>
+<li>区可以使得 B+树中每层双向链表相邻的页的物理位置也相邻，这样可以使用顺序 IO 提高速度</li>
+</ul>
+<h4 id="InnoDB-行格式-COMPACT"><a href="#InnoDB-行格式-COMPACT" class="headerlink" title="InnoDB 行格式 COMPACT"></a>InnoDB 行格式 COMPACT</h4><p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240317103104.png" srcset="/notes/img/loading.gif" lazyload></p>
+<ul>
+<li>变长字段长度列表：用来存放当前记录所有变长字段的长度</li>
+<li>NULL 值列表：存放所有可以为 NULL 的字段是否为 NULL，每个字段用 1bit 表示</li>
+<li>row_id：隐式主键，如果建表时存在主键或者不存在主键但是存在非空唯一索引，这个字段就没有用了，否则会设置隐式自增主键</li>
+<li>trx_id：事务 id，表明这条记录是由哪个事务生成的</li>
+<li>roll_pointer：指向 undolog 上一个版本的指针</li>
+</ul>
+<h4 id="varchar-n-中-n-最大取值为多少"><a href="#varchar-n-中-n-最大取值为多少" class="headerlink" title="varchar(n) 中 n 最大取值为多少"></a>varchar(n) 中 n 最大取值为多少</h4><p>Mysql 一行记录最大长度为 65535 字节，所有字段的长度 + 变长字段字节数列表所占用的字节数 + NULL 值列表所占用的字节数 &lt;&#x3D; 65535。</p>
+<h4 id="行溢出后，MySQL-是怎么处理的"><a href="#行溢出后，MySQL-是怎么处理的" class="headerlink" title="行溢出后，MySQL 是怎么处理的"></a>行溢出后，MySQL 是怎么处理的</h4><p>如果一个数据页存不了一条记录，InnoDB 存储引擎会自动将溢出的数据存放到「溢出页」中。</p>
+<h2 id="索引篇"><a href="#索引篇" class="headerlink" title="索引篇"></a>索引篇</h2><p>索引的定义就是帮助存储引擎快速查找数据的一种数据结构，形象的说就是索引是数据的目录。</p>
+<p>所谓的存储引擎，说白了就是如何存储数据、如何为存储的数据建立索引和如何更新、查询数据等技术的实现方法。</p>
+<h3 id="从数据页的角度看-B-树"><a href="#从数据页的角度看-B-树" class="headerlink" title="从数据页的角度看 B+ 树"></a>从数据页的角度看 B+ 树</h3><p>InnoDB 的数据是按「数据页」为单位来读写的，默认数据页大小为 16 KB。每个数据页之间通过双向链表的形式组织起来，物理上不连续，但是逻辑上连续。</p>
+<h4 id="一个数据页里面是什么样的"><a href="#一个数据页里面是什么样的" class="headerlink" title="一个数据页里面是什么样的"></a>一个数据页里面是什么样的</h4><p>一个数据页里面存放了多条记录，数据页中的记录按照「主键」顺序组成单向链表。当按照主键进行查询的时候，由于是单链表的结构所以只能遍历整个链表。为提高查询效率引入了分组的方式，页目录中的每个槽都索引了分组的最后一条记录，因此每次查询时可以先用二分法查到相应的槽，然后再去槽对应的分组中遍历得到记录。</p>
+<p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240317142341.png" srcset="/notes/img/loading.gif" lazyload></p>
+<h4 id="B-树是如何进行查询的"><a href="#B-树是如何进行查询的" class="headerlink" title="B+ 树是如何进行查询的"></a>B+ 树是如何进行查询的</h4><p>InnoDB 里的 B+ 树中的每个节点都是一个数据页，非叶子节点的数据页只存放索引不存放记录数据，叶子节点的数据页存放的是记录数据。</p>
+<p>比如说我们要查找主键为 6 的记录，首先在根叶子节点二分法定位槽，然后遍历链表找到大于等于 1 且小于 7 对应页 30。在页 30 非叶子节点二分法定位槽，然后遍历链表找到大于等于 5 对应页 16。在页 16 叶子节点二分法定位槽，然后遍历链表找到主键为 6 的记录。</p>
+<p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240317151626.png" srcset="/notes/img/loading.gif" lazyload></p>
+<h4 id="聚簇索引和二级索引"><a href="#聚簇索引和二级索引" class="headerlink" title="聚簇索引和二级索引"></a>聚簇索引和二级索引</h4><p>索引又可以分成聚簇索引和非聚簇索引（二级索引），它们区别就在于叶子节点存放的是什么数据：</p>
+<ul>
+<li>聚簇索引的叶子节点存放的是实际数据，所有完整的用户记录都存放在聚簇索引的叶子节点；</li>
+<li>二级索引的叶子节点存放的是主键值，而不是实际数据。</li>
+</ul>
+<p>因为表的数据都是存放在聚簇索引的叶子节点里，所以 InnoDB 存储引擎一定会为表创建一个聚簇索引，且由于数据在物理上只会保存一份，所以聚簇索引只能有一个。</p>
+<h4 id="回表和索引覆盖"><a href="#回表和索引覆盖" class="headerlink" title="回表和索引覆盖"></a>回表和索引覆盖</h4><p>如果某个查询语句使用了二级索引，但是查询的数据不是主键值，这时在二级索引找到主键值后，需要去聚簇索引中获得数据行，这个过程就叫作「回表」，也就是说要查两个 B+ 树才能查到数据。不过，当查询的数据是主键值时，因为只在二级索引就能查询到，不用再去聚簇索引查，这个过程就叫作「索引覆盖」，也就是只需要查一个 B+ 树就能找到数据。</p>
+<h3 id="为什么-MySQL-采用-B-树作为索引"><a href="#为什么-MySQL-采用-B-树作为索引" class="headerlink" title="为什么 MySQL 采用 B+ 树作为索引"></a>为什么 MySQL 采用 B+ 树作为索引</h3><p>磁盘读写的最小单位是扇区，扇区的大小只有 <code>512B</code> 大小，操作系统一次会读写多个扇区，所以操作系统的最小读写单位是块（Block）。Linux 中的块大小为 4KB，也就是一次磁盘 I&#x2F;O 操作会直接读写 8 个扇区。</p>
+<p>MySQL 的索引结构应该满足以下两点：</p>
+<ul>
+<li>能在尽可能少的磁盘 I&#x2F;O 次数下查找记录</li>
+<li>既能高效查找某条记录，也能高效查找某个范围内的记录</li>
+</ul>
+<h4 id="可能的索引结构"><a href="#可能的索引结构" class="headerlink" title="可能的索引结构"></a>可能的索引结构</h4><p>首先我们需要明确，数据页在存储上并不是连续存储的。</p>
+<ul>
+<li>二分法：把每个数据页地址组成一个连续存储的数组，并按照主键 id 从小到大排列，然后就可以二分查找了。二分法查找单条记录或者范围记录的时间复杂度都是 O(log(n))，远差于 B+树。</li>
+<li>平衡二叉搜索树（AVL）：把每个数据页地址组成一个 AVL 树，AVL 树的查找、插入、删除时间复杂度都是 O(log(n))，而二分法的插入、删除时间复杂度是 O(n)。但 AVL 树无法高效范围查找。</li>
+<li>B 树：相当于平衡多叉搜索树，相比于 AVL 树查询效率得到提升，IO 次数更少，但仍然无法高效范围查找（只能遍历树）。</li>
+<li>B+树：和 B 树的区别在于，记录只存在叶子结点，并且每层节点之间由双向链表连接。相比于 B 树，因为非叶子节点不存记录数据，所以非叶子节点可以存更多的索引，因此整体结构更加扁平，查询的磁盘 IO 次数更少，且支持高效范围查找。</li>
+</ul>
+<h3 id="MySQL-单表不要超过-2000W-行"><a href="#MySQL-单表不要超过-2000W-行" class="headerlink" title="MySQL 单表不要超过 2000W 行"></a>MySQL 单表不要超过 2000W 行</h3><p>MySQL 单表不要超过多少行这个问题和表结构有哪些字段以及字段类型有关。核心问题是希望聚簇索引的 B+树层数不要超过 3 层，否则太高的磁盘 IO 次数会导致查询效率降低。</p>
+<p>我们假设：</p>
+<ul>
+<li>非叶子节点内指向其他页的数量为 x</li>
+<li>叶子节点内能容纳的数据行数为 y</li>
+<li>B+ 数的层数为 z</li>
+</ul>
+<p>则行数$Total &#x3D;x^{z-1}y$，一个数据页大概能存 1280 个索引，即$x&#x3D;1280$，我们假设一行数据占 1KB 大小，那么一个数据页大概能存 15 行记录。算下来，当 B+树层数为 3 时最多能存约 2450w 行记录。</p>
+<h3 id="索引失效有哪些"><a href="#索引失效有哪些" class="headerlink" title="索引失效有哪些"></a>索引失效有哪些</h3><ul>
+<li>对索引使用左或者左右模糊匹配：也就是 <code>like %xx%</code> 或者 <code>like %xx%</code> 这两种方式</li>
+<li>对索引使用函数或对索引进行表达式计算：如果查询条件中对索引字段使用函数，就会导致索引失效。B+树是按照索引字段原来的值构建的，经过函数映射后当然不再适用。</li>
+<li>对索引隐式类型转换：比如下面的例子，phone 是 varchar 类型，自动转换为数字<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">from</span> t_user <span class="hljs-keyword">where</span> phone <span class="hljs-operator">=</span> <span class="hljs-number">1300000001</span>;<br></code></pre></td></tr></table></figure></li>
+<li>联合索引非最左匹配：单字段索引在排序时直接按单字段排序即可，而联合索引在排序时先按第一个字段排序，第一个字段相同时再按第二个字段排序，以此类推。因此联合索引要能正确使用需要遵循最左匹配原则，以下情况会走联合索引：<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">where</span> a<span class="hljs-operator">=</span><span class="hljs-number">1</span>；<br><span class="hljs-keyword">where</span> a<span class="hljs-operator">=</span><span class="hljs-number">1</span> <span class="hljs-keyword">and</span> b<span class="hljs-operator">=</span><span class="hljs-number">2</span> <span class="hljs-keyword">and</span> c<span class="hljs-operator">=</span><span class="hljs-number">3</span>；<br><span class="hljs-keyword">where</span> a<span class="hljs-operator">=</span><span class="hljs-number">1</span> <span class="hljs-keyword">and</span> b<span class="hljs-operator">=</span><span class="hljs-number">2</span>；<br></code></pre></td></tr></table></figure>
+以下情况会全表扫描：<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">where</span> b<span class="hljs-operator">=</span><span class="hljs-number">2</span>；<br><span class="hljs-keyword">where</span> c<span class="hljs-operator">=</span><span class="hljs-number">3</span>；<br><span class="hljs-keyword">where</span> b<span class="hljs-operator">=</span><span class="hljs-number">2</span> <span class="hljs-keyword">and</span> c<span class="hljs-operator">=</span><span class="hljs-number">3</span>；<br></code></pre></td></tr></table></figure>
+以下情况会部分走联合索引的<strong>索引下推</strong>：<code>a = 1</code>会走联合索引，在查到一条记录后不会回表查整行记录再判断<code>c=3</code>，而是先判断 c，如果<code>c=3</code>才会回表查整行数据并返回。<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">where</span> a <span class="hljs-operator">=</span> <span class="hljs-number">1</span> <span class="hljs-keyword">and</span> c <span class="hljs-operator">=</span> <span class="hljs-number">3</span>；<br></code></pre></td></tr></table></figure></li>
+<li>WHERE 子句中的 OR：id 字段是主键，age 字段没有索引。那么下面这条 sql 走全表扫描，这是因为 OR 的含义就是两个只要满足一个即可，因此只有一个条件列是索引列是没有意义的，只要有条件列不是索引列，就会进行全表扫描。<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">from</span> t_user <span class="hljs-keyword">where</span> id <span class="hljs-operator">=</span> <span class="hljs-number">1</span> <span class="hljs-keyword">or</span> age <span class="hljs-operator">=</span> <span class="hljs-number">18</span>;<br></code></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="count-和-count-1-有什么区别"><a href="#count-和-count-1-有什么区别" class="headerlink" title="count(*) 和 count(1) 有什么区别"></a>count(*) 和 count(1) 有什么区别</h3><p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240317221540.png" srcset="/notes/img/loading.gif" lazyload></p>
+<p>server 层会循环向 InnoDB 读取一条记录，如果 count 函数指定的参数不为 NULL，那么就会将变量 count 加 1，直到符合查询的全部记录被读完，就退出循环。最后将 count 变量的值发送给客户端。</p>
+<ul>
+<li>count(主键字段) ：全扫描聚簇索引或二级索引，判断主键字段是否为 NULL，count 加一</li>
+<li>count(1)：全扫描聚簇索引或二级索引，count 加一</li>
+<li>count(*)：等价于 count(0)</li>
+<li>count(字段)：如果字段是普通字段则全表扫描，如果是索引字段则全扫描索引</li>
+</ul>
+<h4 id="为什么要通过遍历的方式来计数"><a href="#为什么要通过遍历的方式来计数" class="headerlink" title="为什么要通过遍历的方式来计数"></a>为什么要通过遍历的方式来计数</h4><p>一方面在有 where 条件限制的时候，肯定要遍历。另一方面在没有 where 条件限制的时候，因为 innodb 存储引擎有着事务隔离的 MVCC 机制，因此不能用一个量来衡量整个表的行数，也需要遍历。</p>
+<h2 id="事务篇"><a href="#事务篇" class="headerlink" title="事务篇"></a>事务篇</h2><h3 id="事务的-ACID-特性"><a href="#事务的-ACID-特性" class="headerlink" title="事务的 ACID 特性"></a>事务的 ACID 特性</h3><p>事务是由 MySQL 的引擎来实现的，我们常见的 InnoDB 引擎它是支持事务的。</p>
+<ul>
+<li>原子性（Atomicity）：一个事务中的所有操作，要么全部完成，要么全部不完成，不会结束在中间某个环节。</li>
+<li>一致性（Consistency）：一致性（Consistency）：是指事务操作前和操作后，数据满足完整性约束，数据库保持一致性状态。</li>
+<li>隔离性（Isolation）：数据库允许多个并发事务同时读写数据，但每个事务内要满足数据一致性。</li>
+<li>持久性（Durability）：事务结束后对数据的修改就是永久的，即便 mysql 进程崩溃重启或者断电重启也不会丢失。</li>
+</ul>
+<p>InnoDB 引擎通过什么技术来保证事务的这四个特性的呢？</p>
+<ul>
+<li>持久性是通过 redo log （重做日志）来保证的</li>
+<li>原子性是通过 undo log（回滚日志） 来保证的</li>
+<li>隔离性是通过 MVCC（多版本并发控制） 或锁机制来保证的</li>
+<li>一致性则是通过持久性+原子性+隔离性来保证</li>
+</ul>
+<h3 id="脏读、不可重复读、幻读"><a href="#脏读、不可重复读、幻读" class="headerlink" title="脏读、不可重复读、幻读"></a>脏读、不可重复读、幻读</h3><ul>
+<li>脏读：一个事务读到了另外一个未提交事务的数据，未提交事务回滚后已经读到的就变成了脏数据。插入、删除和修改都可以导致脏读。<br><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240318201101.png" srcset="/notes/img/loading.gif" lazyload></li>
+<li>不可重复读：在一个事务内多次读取同一个数据，如果出现同一行记录前后两次读到的数据不一样的情况，就意味着发生了「不可重复读」现象。只有修改可以导致不可重复读，插入和删除不会导致不可重复读。<br><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240318202103.png" srcset="/notes/img/loading.gif" lazyload></li>
+<li>幻读：在一个事务内多次查询符合某个查询条件的所有记录，如果出现前后两次查询的结果条目并不是一一对应的，就意味着发生了「幻读」现象。插入、删除和修改都可以导致幻读，其中修改是修改一些字段使其不满足查询条件。<br><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240318205141.png" srcset="/notes/img/loading.gif" lazyload></li>
+</ul>
+<h3 id="隔离级别"><a href="#隔离级别" class="headerlink" title="隔离级别"></a>隔离级别</h3><ul>
+<li>读未提交：指一个事务还没提交时，它做的变更就能被其他事务看到。</li>
+<li>读已提交：指一个事务提交之后，它做的变更才能被其他事务看到</li>
+<li>可重复读：指一个事务执行过程中看到的数据，一直跟这个事务启动时看到的数据是一致的，MySQL InnoDB 引擎的默认隔离级别</li>
+<li>串行化：会对记录加上读写锁，在多个事务对这条记录进行读写操作时，如果发生了读写冲突的时候，后访问的事务必须等前一个事务执行完成，才能继续执行，因为只有事务结束时才会释放所有的读锁&#x2F;写锁</li>
+</ul>
+<p>MySQL InnoDB 引擎的默认隔离级别虽然是「可重复读」，但是它很大程度上避免幻读现象</p>
+<h4 id="四种隔离级别是如何实现的"><a href="#四种隔离级别是如何实现的" class="headerlink" title="四种隔离级别是如何实现的"></a>四种隔离级别是如何实现的</h4><ul>
+<li>「读未提交」：直接读取最新的数据就好了</li>
+<li>「串行化」：每行记录都要加读写锁</li>
+<li>「读提交」和「可重复读」：它们是通过 Read View 来实现的，它们的区别在于创建 Read View 的时机不同。「读已提交」是在查询前生成一个 Read View，「可重复读」是在开启事务时生成一个 Read View。</li>
+</ul>
+<h3 id="并发版本控制协议-MVCC"><a href="#并发版本控制协议-MVCC" class="headerlink" title="并发版本控制协议 MVCC"></a>并发版本控制协议 MVCC</h3><p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240318213242.png" srcset="/notes/img/loading.gif" lazyload></p>
+<p>Read View 有四个重要的字段：</p>
+<ul>
+<li>creator_trx_id：指的是创建该 Read View 的事务的事务 id</li>
+<li>m_ids：指的是在创建 Read View 时，已开启但还未提交的事务</li>
+<li>min_trx_id：m_ids 的最小值</li>
+<li>max_trx_id ：创建 Read View 时当前数据库中应该给下一个事务的 id 值</li>
+</ul>
+<p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240318213628.png" srcset="/notes/img/loading.gif" lazyload></p>
+<p>聚簇索引记录中的两个隐藏列：</p>
+<ul>
+<li>trx_id：当一个事务对某条聚簇索引记录进行改动时，就会把该事务的事务 id 记录在 trx_id 隐藏列里</li>
+<li>roll_pointer：指向当前记录上一个版本的 undo log，每次对聚簇索引记录进行改动时，都会把旧版本的记录写入到 undo log 中</li>
+</ul>
+<p>在创建 Read View 后，我们可以将记录中的 trx_id 划分这三种情况：<br><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240318214006.png" srcset="/notes/img/loading.gif" lazyload></p>
+<p>一个事务去访问记录的时候，先看最新记录数据，如果最新记录数据对当前事务不可见，则沿着 undo log 链向下追溯，直到找到当前事务可见的版本记录。</p>
+<p>在事务中，自己的更新记录总是可见的，生成 Read View 之前已提交事务的记录数据是可见的，生成 Read View 之前已开启但未提交或未开启的事务的记录数据都是不可见的。</p>
+<ul>
+<li>读已提交是在查询前生成一个 Read View，所以读已提交隔离级别下的事务中，每次都读的是当前时刻已提交的最新记录数据</li>
+<li>可重复读是在开启事务时生成一个 Read View，所以可重复读隔离级别下的事务中，相当于在事务开始时生成了一份数据快照，并且只有当前事务可以对它进行修改</li>
+</ul>
+<h3 id="MySQL-可重复读隔离级别，完全解决幻读了吗？"><a href="#MySQL-可重复读隔离级别，完全解决幻读了吗？" class="headerlink" title="MySQL 可重复读隔离级别，完全解决幻读了吗？"></a>MySQL 可重复读隔离级别，完全解决幻读了吗？</h3><h4 id="快照读"><a href="#快照读" class="headerlink" title="快照读"></a>快照读</h4><p>借助于 MVCC、Read View、undo log 这一套机制，快照读大部分情况下可以避免幻读，但也有一些特殊情况。</p>
+<h5 id="第一个发生幻读现象的场景"><a href="#第一个发生幻读现象的场景" class="headerlink" title="第一个发生幻读现象的场景"></a>第一个发生幻读现象的场景</h5><p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240318223432.png" srcset="/notes/img/loading.gif" lazyload></p>
+<h5 id="第二个发生幻读现象的场景"><a href="#第二个发生幻读现象的场景" class="headerlink" title="第二个发生幻读现象的场景"></a>第二个发生幻读现象的场景</h5><ul>
+<li>T1 时刻：事务 A 先执行「快照读语句」：select * from t_test where id &gt; 100 得到了 3 条记录。</li>
+<li>T2 时刻：事务 B 往插入一个 id&#x3D; 200 的记录并提交；</li>
+<li>T3 时刻：事务 A 再执行「当前读语句」 select * from t_test where id &gt; 100 for update 就会得到 4 条记录，此时也发生了幻读现象。</li>
+</ul>
+<p>要避免这类特殊场景下发生幻读的现象的话，就是尽量在开启事务之后，马上执行 select … for update 这类当前读的语句，因为它会对记录加 next-key lock，从而避免其他事务插入一条新记录。</p>
+<h4 id="当前读"><a href="#当前读" class="headerlink" title="当前读"></a>当前读</h4><p>当前读读的是所有记录已提交的最新数据。Innodb 引擎借助于间隙锁、记录锁和 next key 锁保证了当前读不会出现幻读问题。</p>
+<h2 id="锁篇"><a href="#锁篇" class="headerlink" title="锁篇"></a>锁篇</h2><h3 id="备份数据库"><a href="#备份数据库" class="headerlink" title="备份数据库"></a>备份数据库</h3><h4 id="全局锁"><a href="#全局锁" class="headerlink" title="全局锁"></a>全局锁</h4><p>全局锁会锁住整个数据库变成只读状态，任何对数据的增删改和对表结构的修改都会阻塞，用全局锁备份数据库会导致业务停滞。</p>
+<p>要使用全局锁，则要执行这条命令：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql">flush tables <span class="hljs-keyword">with</span> read lock<br></code></pre></td></tr></table></figure>
+
+<p>如果要释放全局锁，则要执行这条命令：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql">unlock tables<br></code></pre></td></tr></table></figure>
+
+<h4 id="MVCC-可重复读"><a href="#MVCC-可重复读" class="headerlink" title="MVCC 可重复读"></a>MVCC 可重复读</h4><p>在可重复读隔离级别下，先开启一个事务，再去 select 查询并备份，这样也能保证数据一致性，并且业务可以正常增删改查。</p>
+<h3 id="表级锁"><a href="#表级锁" class="headerlink" title="表级锁"></a>表级锁</h3><h4 id="表锁"><a href="#表锁" class="headerlink" title="表锁"></a>表锁</h4><p>果我们想对学生表（t_student）加表锁，可以使用下面的命令：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-operator">/</span><span class="hljs-operator">/</span>表级别的共享锁，也就是读锁；<br>lock tables t_student read;<br><br><span class="hljs-operator">/</span><span class="hljs-operator">/</span>表级别的独占锁，也就是写锁；<br>lock tables t_stuent write;<br></code></pre></td></tr></table></figure>
+
+<p>要释放表锁，可以使用下面这条命令，会释放当前会话的所有表锁：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql">unlock tables<br></code></pre></td></tr></table></figure>
+
+<h4 id="元数据锁"><a href="#元数据锁" class="headerlink" title="元数据锁"></a>元数据锁</h4><p>我们不需要显示的使用 MDL，因为当我们对数据库表进行操作时，会自动给这个表加上 MDL：</p>
+<ul>
+<li>对一张表进行 CRUD 操作时，加的是 MDL 读锁</li>
+<li>对一张表做结构变更操作的时候，加的是 MDL 写锁</li>
+</ul>
+<p>MDL 是为了保证当用户对表执行 CRUD 操作时，防止其他线程对这个表结构做了变更。</p>
+<h4 id="意向锁"><a href="#意向锁" class="headerlink" title="意向锁"></a>意向锁</h4><ul>
+<li>在使用 InnoDB 引擎的表里对某些记录加上「共享锁」之前，需要先在表级别加上一个「意向共享锁」</li>
+<li>在使用 InnoDB 引擎的表里对某些纪录加上「独占锁」之前，需要先在表级别加上一个「意向独占锁」</li>
+</ul>
+<p>意向共享锁、意向独占锁、共享表锁、独占表锁之间构成读写锁关系（意向锁之间不会发生冲突），这样就能保证比如行级别的独占记录锁和独占表锁之间会互斥。而如果没有「意向锁」，那么加「独占表锁」时，就需要遍历表里所有记录，查看是否有记录存在独占锁，这样效率会很慢。</p>
+<h3 id="行级锁"><a href="#行级锁" class="headerlink" title="行级锁"></a>行级锁</h3><h4 id="记录锁"><a href="#记录锁" class="headerlink" title="记录锁"></a>记录锁</h4><p>记录锁针对于一个行记录，有 S 锁和 X 锁之分，S 锁是共享锁， X 锁是独占锁。</p>
+<p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240319095821.png" srcset="/notes/img/loading.gif" lazyload></p>
+<h4 id="间隙锁"><a href="#间隙锁" class="headerlink" title="间隙锁"></a>间隙锁</h4><p>只存在于可重复读隔离级别。X 型间隙锁和 S 型间隙锁没有区别，且间隙锁与间隙锁之间是兼容的，在间隙锁区间内的插入意向锁要等待间隙锁释放。</p>
+<p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240319095839.png" srcset="/notes/img/loading.gif" lazyload></p>
+<h4 id="Next-Key-锁"><a href="#Next-Key-锁" class="headerlink" title="Next-Key 锁"></a>Next-Key 锁</h4><p>Next-Key 锁称为临键锁，是间隙锁和记录锁的组合</p>
+<p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240319095914.png" srcset="/notes/img/loading.gif" lazyload></p>
+<h4 id="插入意向锁"><a href="#插入意向锁" class="headerlink" title="插入意向锁"></a>插入意向锁</h4><p>一个事务在插入一条记录的时候，需要判断插入位置是否已被其他事务加了间隙锁，如果有的话会生成一个插入意向锁，并设置状态为等待，直到事务结束间隙锁释放。</p>
+<h4 id="各种加锁情况（在事务中）"><a href="#各种加锁情况（在事务中）" class="headerlink" title="各种加锁情况（在事务中）"></a>各种加锁情况（在事务中）</h4><p>下面这条语句会在 id &#x3D; 1 上加一个插入意向锁。具体过程如下：首先走聚簇索引查看是否主键冲突，然后加一个插入意向锁并根据间隙锁情况判断该插入意向锁是否应该等待，插入新的行数据到聚簇索引的 B+树相应的数据页中，并设置行记录的事务 id 为当前事务。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">insert</span> <span class="hljs-keyword">into</span> <span class="hljs-keyword">table</span> <span class="hljs-keyword">values</span>(x1,x2) <span class="hljs-keyword">where</span> id <span class="hljs-operator">=</span> <span class="hljs-number">1</span><br></code></pre></td></tr></table></figure>
+
+<p>下面这两条语句会在 id &#x3D; 1 上加一个 X 型记录锁。更新操作的具体过程如下：首先走聚簇索引查看是否有这条记录，然后加一个 X 型记录锁并判断该记录锁是否应该等待（该行记录是否已经存在 X 型或 S 型记录锁），将更新的数据放入 undo log 链的首部，并设置行记录的事务 id 为当前事务。直到事务结束时释放 X 型记录锁。</p>
+<p>需要注意的是，<code>update</code>和<code>delete</code>相当于当前读，具体 sql 会上哪些锁直接参考<strong>当前读的各种情况</strong>即可，比如下面两条其实对应的就是唯一索引等值查询且记录存在的情况，加的是 X 型记录锁。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">update</span> <span class="hljs-keyword">table</span> .... <span class="hljs-keyword">where</span> id <span class="hljs-operator">=</span> <span class="hljs-number">1</span>;<br><br><span class="hljs-keyword">delete</span> <span class="hljs-keyword">from</span> <span class="hljs-keyword">table</span> <span class="hljs-keyword">where</span> id <span class="hljs-operator">=</span> <span class="hljs-number">1</span>;<br></code></pre></td></tr></table></figure>
+
+<p>下面这条语句是快照读，快照读是无锁的</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">from</span> <span class="hljs-keyword">table</span> <span class="hljs-keyword">where</span> ...<br></code></pre></td></tr></table></figure>
+
+<h5 id="当前读的各种情况"><a href="#当前读的各种情况" class="headerlink" title="当前读的各种情况"></a>当前读的各种情况</h5><p>当前读会加哪些锁取决于加哪些锁就可以避免幻读</p>
+<h6 id="唯一索引等值查询"><a href="#唯一索引等值查询" class="headerlink" title="唯一索引等值查询"></a>唯一索引等值查询</h6><p>当查询记录存在时，加的是 X 型记录锁，这样直到当前事务结束，其他事务都不可以 update 和 delete 这条记录，因为 update 和 delete 都会上 X 型记录锁。</p>
+<p>当查询记录不存在时，会在比查询记录更大的下一条记录上加间隙锁（在某条记录上加间隙锁，间隙锁的作用范围就是这条记录到上一条记录），这样直到当前事务结束，其他事务都不可以 insert 查询记录，因为 insert 会产生插入意向锁。</p>
+<h6 id="唯一索引范围查询"><a href="#唯一索引范围查询" class="headerlink" title="唯一索引范围查询"></a>唯一索引范围查询</h6><p>参见小林 coding</p>
+<h6 id="非唯一索引等值查询"><a href="#非唯一索引等值查询" class="headerlink" title="非唯一索引等值查询"></a>非唯一索引等值查询</h6><p>参见小林 coding</p>
+<h6 id="非唯一索引范围查询"><a href="#非唯一索引范围查询" class="headerlink" title="非唯一索引范围查询"></a>非唯一索引范围查询</h6><p>参见小林 coding</p>
+<h6 id="全表扫描查询"><a href="#全表扫描查询" class="headerlink" title="全表扫描查询"></a>全表扫描查询</h6><p>如果当前读、update 或 delete，没有使用索引列作为查询条件，或者查询语句没有走索引查询，导致扫描是全表扫描。那么，每一条记录的索引上都会加 next-key 锁，这样就相当于锁住的全表，这时如果其他事务对该表进行增、删、改操作的时候，都会被阻塞。</p>
+<p>因此，在线上在执行 update、delete、select … for update 等具有加锁性质的语句，一定要检查语句是否走了索引，如果是全表扫描的话，会对每一个索引加 next-key 锁，相当于把整个表锁住了，这是挺严重的问题。</p>
+<h3 id="Mysql-中的死锁"><a href="#Mysql-中的死锁" class="headerlink" title="Mysql 中的死锁"></a>Mysql 中的死锁</h3><p>下面是一个死锁的例子</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> `t_order` (<br>  `id` <span class="hljs-type">int</span> <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">NULL</span> AUTO_INCREMENT,<br>  `order_no` <span class="hljs-type">int</span> <span class="hljs-keyword">DEFAULT</span> <span class="hljs-keyword">NULL</span>,<br>  `create_date` datetime <span class="hljs-keyword">DEFAULT</span> <span class="hljs-keyword">NULL</span>,<br>  <span class="hljs-keyword">PRIMARY</span> KEY (`id`),<br>  KEY `index_order` (`order_no`) <span class="hljs-keyword">USING</span> BTREE<br>) ENGINE<span class="hljs-operator">=</span>InnoDB ;<br></code></pre></td></tr></table></figure>
+
+<p>其中 id 是主键，order_no 是非唯一索引</p>
+<p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240320094603.png" srcset="/notes/img/loading.gif" lazyload></p>
+<p>我们要插入订单，为了保证消息幂等性，需要先开启事务然后再做一个当前读，如果没有这条订单，那么就插入然后结束事务，如果已有这条订单，那么就直接结束事务。</p>
+<ul>
+<li>为什么不选择不开启事务时读呢？因为不开启事务时读是读的最新数据，因为没有锁，所以并不满足幂等性。</li>
+<li>为什么不选择开启事务后的快照读呢？一方面快照读无锁且读的不是最新数据，所以不满足幂等性。</li>
+</ul>
+<p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240320095533.png" srcset="/notes/img/loading.gif" lazyload></p>
+<p>上面这种方式可能会出现死锁，事务 A 先当前读没读到并加一个$(1006,+\infty)$的间隙锁，然后事务 B 再当前读没读到并加一个$(1006,+\infty)$的间隙锁，然后事务 A insert 主键 id 为 1007 的记录，事务 A 的插入意向锁和事务 B 的间隙锁冲突，事务 A 阻塞并等待事务 B 的间隙锁释放，然后事务 B insert 主键 id 为 1007 的记录，事务 B 的插入意向锁和事务 A 的间隙锁冲突，事务 B 阻塞并等待事务 A 的间隙锁释放……</p>
+<h4 id="如何避免死锁"><a href="#如何避免死锁" class="headerlink" title="如何避免死锁"></a>如何避免死锁</h4><p>打破循环等待条件的角度</p>
+<ul>
+<li>设置事务等待锁的超时时间：当一个事务的等待时间超过该值后，就对这个事务进行回滚，于是锁就释放了，另一个事务就可以继续执行了。</li>
+<li>开启主动死锁检测：主动死锁检测在发现死锁后，主动回滚死锁链条中的某一个事务，让其他事务得以继续执行。</li>
+</ul>
+<p>业务的角度<br>设置 order_no 字段为唯一索引，每次直接 insert 就好，但要记得捕获异常。</p>
+<h2 id="日志篇"><a href="#日志篇" class="headerlink" title="日志篇"></a>日志篇</h2><ul>
+<li>undo log（回滚日志）：是 Innodb 存储引擎层生成的日志，实现了事务中的原子性，主要用于事务回滚和 MVCC</li>
+<li>redo log（重做日志）：是 Innodb 存储引擎层生成的日志，实现了事务中的持久性，主要用于掉电等故障恢复</li>
+<li>binlog （归档日志）：是 Server 层生成的日志，主要用于数据备份和主从复制</li>
+</ul>
+<h3 id="undo-log"><a href="#undo-log" class="headerlink" title="undo log"></a>undo log</h3><p>我们在执行一条增删改语句的时候，虽然没有输入 begin 开启事务和 commit 提交事务，但是 MySQL 会隐式开启事务来执行增删改语句，执行完就自动提交事务，这样就保证了执行完增删改语句后，我们可以及时在数据库表看到增删改的结果了。</p>
+<p>每当 InnoDB 引擎对一条记录进行操作（修改、删除、新增）时，要把回滚时需要的信息都记录到 undo log 里，比如：</p>
+<ul>
+<li>在插入一条记录时，要把这条记录的主键值记下来，这样之后回滚时只需要把这个主键值对应的记录删掉就好了；</li>
+<li>在删除一条记录时，要把这条记录中的内容都记下来，这样之后回滚时再把由这些内容组成的记录插入到表中就好了；</li>
+<li>在更新一条记录时，要把被更新的列的旧值记下来，这样之后回滚时再把这些列更新为旧值就好了。</li>
+</ul>
+<p>undo log 版本链如下图：<br><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240320103527.png" srcset="/notes/img/loading.gif" lazyload></p>
+<h3 id="Buffer-Pool"><a href="#Buffer-Pool" class="headerlink" title="Buffer Pool"></a>Buffer Pool</h3><p>Buffer Pool 是 Innodb 存储引擎设计的一个缓冲池，用于提高数据页读写效率</p>
+<ul>
+<li>当读取数据时，如果数据存在于 Buffer Pool 中，客户端就会直接读取 Buffer Pool 中的数据，否则再去磁盘中读取。</li>
+<li>当修改数据时，如果数据存在于 Buffer Pool 中，那直接修改 Buffer Pool 中数据所在的页，然后将其页设置为脏页（该页的内存数据和磁盘上的数据已经不一致），为了减少磁盘 I&#x2F;O，不会立即将脏页写入磁盘，后续由后台线程选择一个合适的时机将脏页写入到磁盘。</li>
+</ul>
+<p>Buffer Pool 是一块连续的内存，存放着一个个大小为 16KB 的缓存页，其中我们主要关注数据页和 undo 页</p>
+<p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240320105629.png" srcset="/notes/img/loading.gif" lazyload></p>
+<h3 id="redo-log"><a href="#redo-log" class="headerlink" title="redo log"></a>redo log</h3><p>InnoDB 引擎会在适当的时候，由后台线程将缓存在 Buffer Pool 的脏页刷新到磁盘里，这就是 WAL （Write-Ahead Logging）技术。</p>
+<p>redo log 用于解决断电导致 Buffer Pool 中还未落盘的脏页数据丢失问题，当有一条记录需要更新的时候，InnoDB 引擎就会先更新内存（同时标记为脏页），然后将本次对这个页的修改以 redo log 的形式记录下来，这个时候更新才算完成。如果断电重启发生在更新完成之前，那么客户端收到更新失败的结果， Buffer Pool 数据丢失，数据是一致的。如果断电重启发生在更新完成之后，那么客户端收到更新成功的结果，Buffer Pool 数据丢失，但是可以利用 redo log 恢复脏数据，数据是一致的。</p>
+<p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240320110858.png" srcset="/notes/img/loading.gif" lazyload></p>
+<p>redo log 是物理日志，记录了某个数据页做了什么修改，比如对 XXX 表空间中的 YYY 数据页 ZZZ 偏移量的地方做了 AAA 更新，每当执行一个事务就会产生这样的一条或者多条物理日志。</p>
+<p>在事务提交时，只要先将 redo log 持久化到磁盘即可，可以不需要等到将缓存在 Buffer Pool 里的脏页数据持久化到磁盘。</p>
+<p>当系统崩溃时，虽然脏页数据没有持久化，但是 redo log 已经持久化，接着 MySQL 重启后，可以根据 redo log 的内容，将所有数据恢复到最新的状态。</p>
+<p>事务提交之前发生了崩溃，重启后会通过 undo log 回滚事务保证事务的原子性，事务未提交 Buffer Pool 脏数据直接丢失即可，事务提交之后发生了崩溃，重启后会通过 redo log 恢复 Buffer Pool 中的脏数据。</p>
+<p>所以有了 redo log，再通过 WAL 技术，InnoDB 就可以保证即使数据库发生异常重启，之前已提交的记录都不会丢失，即保证了事务四大特性中的持久性。</p>
+<h4 id="redo-log-要写到磁盘，数据也要写磁盘，为什么要多此一举？"><a href="#redo-log-要写到磁盘，数据也要写磁盘，为什么要多此一举？" class="headerlink" title="redo log 要写到磁盘，数据也要写磁盘，为什么要多此一举？"></a>redo log 要写到磁盘，数据也要写磁盘，为什么要多此一举？</h4><p>写入 redo log 的方式使用了追加操作， 所以磁盘操作是顺序写，而写入数据需要先找到写入位置，然后才写到磁盘，所以磁盘操作是随机写。磁盘的「顺序写 」比「随机写」 高效的多。</p>
+<h4 id="redo-log-刷盘"><a href="#redo-log-刷盘" class="headerlink" title="redo log 刷盘"></a>redo log 刷盘</h4><p>redo log 在刚产生时会存放于 redo log buffer 内存缓存中，一般会在每隔一秒以及事务提交时刷入磁盘。</p>
+<h4 id="redo-log-文件写满了怎么办"><a href="#redo-log-文件写满了怎么办" class="headerlink" title="redo log 文件写满了怎么办"></a>redo log 文件写满了怎么办</h4><p>一共有两个 redo log 文件，它们构成一个环形以循环写的方式工作，write pos 表示 redo log 当前记录写到的位置，用 checkpoint 表示当前要擦除的位置，如果 buffer pool 中的脏页已经刷新到了磁盘，那么脏页对应的 redo log 就可以擦除。</p>
+<p>如果 write pos 追上了 checkpoint，就意味着 redo log 文件满了，此时 Mysql 会阻塞并将 buffer pool 中的脏页不断刷新到磁盘，然后擦除相应的 redo log。</p>
+<p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240321091950.png" srcset="/notes/img/loading.gif" lazyload></p>
+<h3 id="binlog"><a href="#binlog" class="headerlink" title="binlog"></a>binlog</h3><p>MySQL 在完成一条增删改操作后，Server 层还会生成一条 binlog，等之后事务提交的时候，会将该事务执行过程中产生的所有 binlog 统一写入 binlog 文件。binlog 文件是记录了所有数据库表结构变更和表数据修改的日志，不会记录查询类的操作。</p>
+<h4 id="binlog-的-3-种格式类型"><a href="#binlog-的-3-种格式类型" class="headerlink" title="binlog 的 3 种格式类型"></a>binlog 的 3 种格式类型</h4><ul>
+<li>STATEMENT：每一条增删改的 SQL 都会被记录到 binlog 中，相当于记录了所有的逻辑操作，主从复制中 slave 端再根据 SQL 语句重现。但如果用了 uuid 或者 now 这些函数，则主库从库执行的结果不一致。</li>
+<li>ROW：记录每行数据的变化结果，不会出现 STATEMENT 下动态函数的问题，缺点是文件比较大。</li>
+<li>MIXED：包含了 STATEMENT 和 ROW 模式，它会根据不同的情况自动使用 ROW 模式和 STATEMENT 模式。</li>
+</ul>
+<h4 id="binlog-和-redo-log-的不同点"><a href="#binlog-和-redo-log-的不同点" class="headerlink" title="binlog 和 redo log 的不同点"></a>binlog 和 redo log 的不同点</h4><p>binlog 在 server 层实现，redo log 在 innodb 存储引擎实现。binlog 用来做备份和主从复制，redo log 用来做 buffer pool 脏数据页恢复。binlog 是追加写，写满一个文件就创建一个新的文件继续写，不会覆盖以前的日志，保存的是全量的日志。<br>redo log 是循环写，日志空间大小是固定。</p>
+<h4 id="主从复制"><a href="#主从复制" class="headerlink" title="主从复制"></a>主从复制</h4><p>主从复制过程如下图，可以看到无论是主库的 binlog 日志发送还是从库的中继日志回放都是异步过程。</p>
+<p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240321095420.png" srcset="/notes/img/loading.gif" lazyload></p>
+<p>有了主从复制机制，主库从库之间就存在了延迟数据同步。客户端可以在写数据时只写主库，在读数据时只读从库，这样每台数据库的压力会变小，并且即使写请求会锁表或者锁记录，也不会影响读请求的执行。但缺点是延迟问题和单点问题（一旦主库宕机就会出现数据丢失）。</p>
+<h5 id="主从复制的其他模型"><a href="#主从复制的其他模型" class="headerlink" title="主从复制的其他模型"></a>主从复制的其他模型</h5><ul>
+<li>同步复制：性能很低、可用性很差</li>
+<li>异步复制：单点问题</li>
+<li>半同步复制：只要一部分从库返回复制成功的响应，就成功提交事务，保证即使出现主库宕机，至少还有一个从库有最新的数据，不存在数据丢失的风险。</li>
+</ul>
+<h4 id="binlog-刷盘"><a href="#binlog-刷盘" class="headerlink" title="binlog 刷盘"></a>binlog 刷盘</h4><p>事务执行过程中，先把日志写到 binlog cache，事务提交的时候，再把 binlog cache 写到 binlog 文件中。每个线程有自己 binlog cache，但是最终都写到同一个 binlog 文件。</p>
+<h3 id="一条-update-语句的执行过程"><a href="#一条-update-语句的执行过程" class="headerlink" title="一条 update 语句的执行过程"></a>一条 update 语句的执行过程</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">UPDATE</span> t_user <span class="hljs-keyword">SET</span> name <span class="hljs-operator">=</span> <span class="hljs-string">&#x27;xiaolin&#x27;</span> <span class="hljs-keyword">WHERE</span> id <span class="hljs-operator">=</span> <span class="hljs-number">1</span>;<br></code></pre></td></tr></table></figure>
+
+<ol>
+<li>优化器分析出成本最小的执行计划。</li>
+<li>通过聚簇索引搜索 id &#x3D; 1 这一行记录，如果 id&#x3D;1 这一行所在的数据页不在 buffer pool 中，就将数据页从磁盘读入到 buffer pool。</li>
+<li>唯一索引等值查询且数据存在，上 X 型记录锁。</li>
+<li>开启事务，生成一条存放该行旧值的 undo log，undo log 会写入 Buffer Pool 中的 Undo 页面并将该页面标记为脏数据，生成一条用于恢复脏 undo 页的 redo log。</li>
+<li>更新 buffer pool 中对应数据页并标记为脏页，生成一条用于恢复脏数据页的 redo log。脏页会通过 WAL 技术由后台线程选择一个合适的时机写入到磁盘。</li>
+<li>记录该语句对应的 binlog，并保存到 binlog cache。</li>
+<li>提交事务，释放锁，两阶段提交（binlog 刷入磁盘、redo log 刷入磁盘）。</li>
+</ol>
+<h3 id="两阶段提交"><a href="#两阶段提交" class="headerlink" title="两阶段提交"></a>两阶段提交</h3><h4 id="为什么需要两阶段提交"><a href="#为什么需要两阶段提交" class="headerlink" title="为什么需要两阶段提交"></a>为什么需要两阶段提交</h4><p>事务提交后，redo log 和 binlog 都要写入磁盘，但是这两个是独立的逻辑，可能出现半成功的状态，这样就造成两份日志之间的逻辑不一致。</p>
+<ul>
+<li>如果 redo log 写入磁盘后断电重启，binlog 没来得及写入：主库是新值，从库是旧值。</li>
+<li>如果 binlog 写入磁盘后断电重启，redo log 没来得及写入：从库是新值，主库是旧值。</li>
+</ul>
+<h4 id="两阶段提交过程"><a href="#两阶段提交过程" class="headerlink" title="两阶段提交过程"></a>两阶段提交过程</h4><p><img src="https://raw.githubusercontent.com/howard1209a/image-resource/main/note/20240321104933.png" srcset="/notes/img/loading.gif" lazyload></p>
+<p>从图中可看出，事务的提交分为 prepare 和 commit 两个阶段：</p>
+<ul>
+<li>prepare 阶段：设置 redo log 的 XID，设置 redo log 的事务状态为 prepare，将 redo log 写入磁盘。</li>
+<li>commit 阶段：设置 binlog 的 XID，将 binlog 写入磁盘，最后调用引擎的提交事务接口，将磁盘中 redo log 状态设置为 commit。</li>
+</ul>
+<p>不管是时刻 A（redo log 已经写入磁盘， binlog 还没写入磁盘），还是时刻 B （redo log 和 binlog 都已经写入磁盘，还没写入 commit 标识）崩溃，此时的 redo log 都处于 prepare 状态。</p>
+<p>在 MySQL 重启后会按顺序扫描 redo log 文件，碰到处于 prepare 状态的 redo log，就拿着 redo log 中的 XID 去 binlog 查看是否存在此 XID：</p>
+<ul>
+<li>如果 binlog 中没有此 XID，说明 redo log 完成刷盘，但是 binlog 还没有刷盘，则回滚事务。</li>
+<li>如果 binlog 中有此 XID，说明 redolog 和 binlog 都已经完成了刷盘，则提交事务。</li>
+</ul>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/notes/tags/%E5%85%AB%E8%82%A1%E6%96%87/" class="print-no-link">#八股文</a>
+      
+        <a href="/notes/tags/Mysql/" class="print-no-link">#Mysql</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Mysql总结</div>
+      <div>https://howard1209a.github.io/notes/2024/01/08/总结篇 Mysql总结/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>howard1209a</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2024年1月8日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/notes/2024/01/08/%E6%80%BB%E7%BB%93%E7%AF%87%20JUC%E6%80%BB%E7%BB%93/" title="JUC总结">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">JUC总结</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/notes/2023/12/14/%E9%9A%8F%E7%AC%94%E7%AF%87%20%E9%AB%98%E7%BA%A7%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F%20/" title="高级分布式系统">
+                        <span class="hidden-mobile">高级分布式系统</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/notes/js/events.js" ></script>
+<script  src="/notes/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/notes/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/notes/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/notes/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

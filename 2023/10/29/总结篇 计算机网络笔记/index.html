@@ -1,0 +1,743 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/notes/img/fluid.png">
+  <link rel="icon" href="/notes/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="howard1209a">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="计算机网络笔记第一章概述网络中的节点可以是计算机、集线器、交换机或路由器。 网络把许多计算机连接在一起，而互连网（internet）则把许多网络通过一些路由器连接在一起，是网络的网络。 互联网（Internet）不同于 internet，指的是当前全球最大的、最开放的特定互连网，它采用 TCP&#x2F;IP 协议族作为通信规则。 互连网服务提供者 ISP 可以向 IP 地址管理机构申请整块的 I">
+<meta property="og:type" content="article">
+<meta property="og:title" content="计算机网络笔记">
+<meta property="og:url" content="https://howard1209a.github.io/notes/2023/10/29/%E6%80%BB%E7%BB%93%E7%AF%87%20%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C%E7%AC%94%E8%AE%B0/index.html">
+<meta property="og:site_name" content="笔记">
+<meta property="og:description" content="计算机网络笔记第一章概述网络中的节点可以是计算机、集线器、交换机或路由器。 网络把许多计算机连接在一起，而互连网（internet）则把许多网络通过一些路由器连接在一起，是网络的网络。 互联网（Internet）不同于 internet，指的是当前全球最大的、最开放的特定互连网，它采用 TCP&#x2F;IP 协议族作为通信规则。 互连网服务提供者 ISP 可以向 IP 地址管理机构申请整块的 I">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-10-29T05:17:15.000Z">
+<meta property="article:modified_time" content="2024-03-28T08:09:47.438Z">
+<meta property="article:author" content="howard1209a">
+<meta property="article:tag" content="八股文">
+<meta property="article:tag" content="计算机网络">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>计算机网络笔记 - 笔记</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/notes/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/notes/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/notes/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"howard1209a.github.io","root":"/notes/","version":"1.9.5","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/notes/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/notes/js/utils.js" ></script>
+  <script  src="/notes/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/notes/">
+      <strong>howard1209a</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/notes/">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/notes/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/notes/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/notes/about/">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/notes/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="计算机网络笔记"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2023-10-29 13:17" pubdate>
+          2023年10月29日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          11k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          92 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">计算机网络笔记</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="计算机网络笔记"><a href="#计算机网络笔记" class="headerlink" title="计算机网络笔记"></a>计算机网络笔记</h1><h4 id="第一章概述"><a href="#第一章概述" class="headerlink" title="第一章概述"></a>第一章概述</h4><p>网络中的节点可以是计算机、集线器、交换机或路由器。</p>
+<p>网络把许多计算机连接在一起，而互连网（internet）则把许多网络通过一些路由器连接在一起，是网络的网络。</p>
+<p>互联网（Internet）不同于 internet，指的是当前全球最大的、最开放的特定互连网，它采用 TCP&#x2F;IP 协议族作为通信规则。</p>
+<p>互连网服务提供者 ISP 可以向 IP 地址管理机构申请整块的 IP 地址，并且 ISP 拥有自己的通信线路和路由器等连网设备，任何机构或个人只要向某个 ISP 交纳规定的费用，就可以从该 ISP 获取所需 IP 地址的租用权，并可以通过此 ISP 接入互联网。</p>
+<p>计算机之间的通信实际上指的是两个主机的进程之间的通信。</p>
+<p>相比于电路交换机制（在通信过程中始终占用端到端的通信资源），计算机网络采用分组交换机制（存储转发技术），分组交换机制的最大好处是提高了网络占用率和路线选择的灵活性，而存储转发技术的好处在于既不轻易丢弃分组，又争取以最快的方式把到达的分组转移出去，至于转移给谁则由维护的转发表决定。</p>
+<p>计算机网络性能指标：速率&#x2F;数据率、带宽、吞吐量、时延（发送时延+传播时延+处理时延+排队时延）、往返时间 RRT、利用率。带宽和吞吐量是一个意思，都指的是每秒传输数据量的大小，然而实际带宽&#x2F;吞吐量和有效带宽&#x2F;吞吐量是有区别的，实际带宽&#x2F;吞吐量指的是信道实际每秒传输数据量的大小，有效带宽&#x2F;吞吐量指的是每秒传输有效数据量的大小。对于 UDP 来说，造成有效带宽&#x2F;吞吐量小于实际带宽&#x2F;吞吐量的因素包括：协议头的损耗、不可避免的丢包损耗。对于 TCP 来说，造成有效带宽&#x2F;吞吐量小于实际带宽&#x2F;吞吐量的因素包括：协议头的损耗、重传的损耗、拥塞控制算法的慢启动带来的损耗。</p>
+<p>网络协议主要有三个要素：语法（数据与控制信息的结构或格式）、语义（对于不同的控制信息要完成何种动作或做出何种响应）、同步（约定事件的实现顺序）。</p>
+<p>在计算机网络体系结构中，每一层都需要基于下层提供的服务，设计本层协议完成一些功能，并向上层提供更好的服务。</p>
+<p>互联网的重要设计理念：网络核心部分越简单越好（最多负责到 IP 层），把一切复杂的部分让网络的边缘部分去实现。</p>
+<p>下面是一个简单架构概述：</p>
+<p>应用层（HTTP）：HTTP 分组给到下层发送缓冲区，被完整发到对面后再给到上层。因此可以看作 HTTP 分组发出，过一会，对面可靠地收到。</p>
+<p>运输层（TCP）：提供网络中任意两台主机间的任意两个进程&#x2F;线程间的可靠字节流传输。上层下来的应用层分组放入发送缓冲区字节流的末尾，确定发送窗口大小，把发送窗口内的比特流分片并组装成 TCP 报文段，交给下层，TCP 报文段是网络中任意两台主机间的任意两个进程&#x2F;线程间的不可靠分组传输。重传时间到后，发送缓冲区字节流的头部被确认的一段字节流被丢掉，调整发送窗口长度，把发送窗口内的比特流分片并组装成 TCP 报文段交给下层，依次重复。因此可以看作字节流是一段一段地可靠传输传输给对方的。</p>
+<p>网络层：提供网络中任意两台主机间的不可靠 IP 数据报传输。具体是根据 IP 数据报首部的目的 IP 查询路由表得到下一跳，然后把 IP 数据报和 MAC 地址给到下层（下层的点到点传输也可能因为出现比特差错而丢掉），IP 数据报一跳一跳最终到达另一台主机，取出 IP 数据报的数据部分（也就是 TCP 报文段），根据 TCP 报文段首部的目标 port 给予这个端口绑定的相应进程。但是 IP 数据报的传输是不可靠的，在途中可能出现比特差错（网卡给到内存的期间）、丢失（分组转发时排队被丢弃、在数据链路层因为检错被丢弃等）、重复、失序（后发的 IP 数据报先到）。</p>
+<p>数据链路层：提供两点间（两点直连&#x2F;两点位于同一个局域网内）的无比特差错以太网帧传输。具体来讲，对于两点直连是将 IP 数据报加入首部和尾部封装成帧，将一个个帧组装成比特流交付物理层，另一端收到比特流后分帧，进行差错检测后将 IP 数据报交付上层，这种情况下以太网帧的首部和尾部的作用主要是分帧和检错。对于两点位于同一个局域网内的情况，局域网内所有网卡都会收到比特流，它们在分帧后会检查以太网帧首部的 MAC 地址是不是自己，不是自己则会丢弃，是自己才会进行差错检测后将 IP 数据报交付上层，这种情况下以太网帧的首部和尾部的作用主要是分帧、检错以及保存 MAC 地址。</p>
+<p>物理层：提供物理链路两端的有损比特流传输。具体是将比特流转换成数字信号，经过调制器将数字信息调制到载波上生成模拟信号，传输到另一端，模拟信号经过解调器恢复出数字信号，最后转换为比特流。</p>
+<h4 id="第二章物理层"><a href="#第二章物理层" class="headerlink" title="第二章物理层"></a>第二章物理层</h4><p>物理层作用：将比特流转换成数字信号，经过调制器将数字信息调制到载波上生成模拟信号，传输到另一端，模拟信号经过解调器恢复出数字信号，最后转换为比特流。对数据链路层提供的服务是：提供物理链路两端的有损比特流传输。</p>
+<p>通信的目的是传送消息（如话音、文字、图像等），数据是运送消息的实体，信号则是数据的电气或电磁体现。</p>
+<p>信噪比定义：信号的平均功率与噪声的平均功率之比</p>
+<p>单工（单向通信）、半双工（双向交替通信）、全双工（双向同时通信）</p>
+<p>物理传输媒体：</p>
+<ul>
+<li>导引型传输媒体：电缆、光缆</li>
+<li>非导引型传输媒体：无线传输</li>
+</ul>
+<p>信道中的频分复用和时分复用</p>
+<h4 id="第三章数据链路层"><a href="#第三章数据链路层" class="headerlink" title="第三章数据链路层"></a>第三章数据链路层</h4><p>数据链路层作用：将 IP 数据报加入首部和尾部封装成帧，将一个个帧组装成比特流交付物理层，另一端收到比特流后分帧，进行差错检测后将 IP 数据报交付上层。对网络层提供的服务是：在物理层提供物理链路两端的有损比特流传输的基础上，对于两点（无论是点对点（点对点信道），还是以太网&#x2F;局域网中的两点（广播信道），在以太网中无论是集线器的结构还是以太网交换机的结构），都可以选择对应的数据链路层协议，向上层提供两点间的无比特差错的分组传输服务。</p>
+<p>数据链路层使用的信道主要有两种类型：点对点信道和广播信道。这个信道可以理解为物理层给数据链路层提供的传输有损比特流的抽象信道，也可以理解为物理层的实际信道（缆线），这两个是对应的。</p>
+<p>局域网属于数据链路层的范围，因为局域网关注的是在同一局域网中，分组怎么从一台主机传送到另一台主机，但并不经过路由器的转发，而网络层关注的是网络互连问题，即分组怎样从一个网络经过路由器转发到另一个网络。</p>
+<p>一般的网络适配器（既有硬件，也有软件），包括了数据链路层和物理层这两层的功能。</p>
+<p>数据链路层要解决的三个基本问题：</p>
+<ol>
+<li>封装成帧：帧首部和帧尾部分别加入帧定界符（帧开始符“SOH”，帧结束符“EOT”），所能传送的帧的数据部分长度上限——最大传送单元 MTU，注意 IP 数据报的长度如果超过 MTU 就会被分片，而 IP 数据报自身最大长度限制是 65535 字节，因此上层给下来的 TCP 报文段最长不能超过（65535-20 首部）字节。</li>
+<li>透明传输：透明传输指的是“无论什么样的比特组合数据，都能够按照原样没有差错地通过这个数据链路层”，这里我们通过转义字符“ESC”解决了数据部分出现帧定界符的问题（利用转义字符的二义性功能）。</li>
+<li>差错检测：在帧首部或帧尾部加入冗余码（帧检验序列 FCS），使用循环冗余检验 CRC 检错技术，对接收端收到的每一帧进行检测，如果没有差错就接受，有差错就丢弃。</li>
+</ol>
+<p>注意数据链路层只实现了无比特差错传输，但这还不是可靠传输，所谓“可靠传输”就是“发送端发送什么，接收端就收到什么”，而传输差错可以分为两大类，一类是比特差错，一类是传输差错，包含帧丢失、帧重复和帧失序。数据链路层和网络层的不可靠交付是由更高层的确认重传机制（比如 TCP）来解决的，但站在这两层的角度，它们并不知道这是重传帧，而是当作新的数据帧来发送。</p>
+<p>如果要求数据链路层向上提供可靠传输，则需要在 CRC 检错的基础上增加帧编号、确认重传机制，现在一般只有在通信质量较差时才需要数据链路层可靠传输。</p>
+<p>点对点信道协议 PPP 协议</p>
+<p>PPP 协议是用户计算机与 ISP 进行通信所使用的数据链路层协议，PPP 协议满足数据链路层的三个基本问题，并且不提供比 IP 协议更多的功能（不需要纠错，不需要序号，不需要流量控制），提供比上层 IP 协议更多的功能没有意义，因为最后都会被 IP 层覆盖。</p>
+<p>PPP 协议包含三个组成部分：一个将 IP 数据报封装成帧的方法、一个链路控制协议 LCP、一个网络控制协议 NCP。</p>
+<p>局域网（又名以太网）的拓扑分为：星形网、环形网、总线网</p>
+<p>适配器（又称网卡）是计算机主机（包括路由器）上负责处理物理层和数据链路层的设备，适配器上装有自己的处理器和存储器，对外（局域网）以电缆串行方式传输，对内（计算机）以主板总线 I&#x2F;O 并行方式传输。具体过程如下：在发送端适配器接收计算机传过来的 IP 数据报，采用相应的数据链路层协议封装成帧，一个个帧连成比特流，比特流转化为数字信号，经过调制后发送。在接收端首先进行解调生成数字信号，转换为比特流，根据相应协议进行分帧，进行差错检测等过程后将 IP 数据报上交给计算机。</p>
+<p>计算机的硬件地址就在适配器的存储 ROM 中，而计算机的软件地址则在计算机的存储器中。</p>
+<p>广播信道协议 CSMA&#x2F;CD 协议</p>
+<p>总线的特点是当一台计算机发送数据时，总线上所有的计算机都能检测到这个数据，而 MAC 地址正是用于标记目的地址与源地址以实现总线上的一对一通信。</p>
+<p>CSMA&#x2F;CD 协议控制物理层：不停地监听信道，如果信道保持空闲就开始发送帧并持续监听信道，若在争用期内一直未检测到碰撞在可以放心发送完这个帧，否则立刻停止发送数据，等待一段时间后再次循环。</p>
+<p>集线器工作在物理层，它的每个端口仅仅转发比特，因此以集线器为中心的星形以太网本质上仍然是一个总线结构。</p>
+<p>三种以太网帧：</p>
+<ul>
+<li>单播帧：一对一</li>
+<li>多播帧：一对多</li>
+<li>广播帧：一对全体</li>
+</ul>
+<p>可以说 CSMA&#x2F;CD 协议保证了同一时间总线上只有一个计算机在发送以太网帧，MAC 地址保证了以太网帧的接收，两者共同实现了总线上点对点的有损比特流通信，接下来需要设计以太网帧实现数据链路层的基本功能即可。</p>
+<p>网桥工作在数据链路层，可以对收到的帧根据其目的 MAC 地址进行转发和过滤，以太网交换机实质是一个多端口网桥，它的每一个端口都直接与一个单台主机或另一个以太网交换机相连，且一般都工作在全双工，以太网交换机还具有并行性，能同时连接多对端口，使多对主机能同时通信。</p>
+<p>交换式以太网相比于共享总线以太网的优点是从一个总线碰撞域扩展到 N 个端口碰撞域，同一时间可以有多个计算机发送比特流，并且比特流只会朝着目标 MAC 地址的线路传输。</p>
+<p>以太网交换机根据发过来的以太网帧的源 MAC 和端口维护交换表，并在交换表中查不到该往哪个端口转发时采用广播方式。</p>
+<h4 id="第四章网络层"><a href="#第四章网络层" class="headerlink" title="第四章网络层"></a>第四章网络层</h4><p>网络层作用：对运输层提供的服务是：在数据链路层提供两点（直接连接或处在同一个以太网中的计算机或路由器）间的无比特差错分组传输服务的基础上，通过根据目的 IP 选择下一跳路由器&#x2F;计算机的功能，向运输层提供互联网任意两端点（任意计算机或路由器）间的不可靠分组传输服务（不可靠是指既有可能出现比特差错，也有可能出现传输差错）。</p>
+<p>网络层要设计得尽量简单，向其上层只提供简单灵活的、无连接的、尽最大努力交付的数据报服务，网络层不提供服务质量的承诺，所传送的分组可能丢失、重复和失序。</p>
+<p>网际协议 IP（Internet Protocal）是 TCP&#x2F;IP 体系中两个最重要的协议之一，与 IP 协议配套使用的还有三个协议：地址解析协议 ARP、网际控制报文协议 ICMP、网际组管理协议 IGMP。</p>
+<p>网络层分组在传送途中的每一次转发都成为一“跳（hop）”，每一跳两端的两个节点都必定直接连接在同一个网络上，即位于同一个以太网内或两个节点直接连接。</p>
+<p>IP 地址就是给连接到互联网上的每一台主机（或路由器）的每一个接口，分配一个在全世界范围内是唯一的 32 位的标识符，IP 地址&#x3D;&lt;网络号&gt;+&lt;主机号&gt;。</p>
+<p>分类 IP 地址：A 类地址、B 类地址、C 类地址、D 类地址、E 类地址</p>
+<p>127.0.0.1 被保留作为本地软件环回测试本主机的进程之间的通信之用，若主机发送一个目的地址为环回地址（如 127.0.0.1）的 IP 数据报，则主机中的协议软件就处理数据报中的数据，而不会把数据报发送到任何网络。</p>
+<p>全 0 和全 1 的主机号一般不指派，全 0 表示“网络地址”，全 1 表示该网络上的所有主机。</p>
+<p>无分类编址 CIDR：CIDR 和传统 IP 分配最大的区别就是网络前缀的位数不再是固定的数，尽管并不会改变 IPV4 的 IP 数量，但 CIDR 能提供更大的灵活性。举个例子，在 CIDR 中，128.14.32.0&#x2F;19 和 128.14.32.0&#x2F;21 都是有效的网络地址，且指的是同一个主机的同一个端口的 IP 地址，但是两者的含义不同，前者的网络前缀位数少，说明是一个更大的网络，而后面的网络前缀位数多两位，说明是前面 19 位网络下的一个 21 位细分网络。</p>
+<p>地址掩码只是用来方便计算机通过按位与运算计算网络前缀的。</p>
+<p>IP 地址管理机构在分配 IP 地址时只分配网络前缀，而剩下的主机号由得到该网络前缀的单位自行分配。</p>
+<p>IP 地址是标志一台主机（或路由器）和一条链路的接口，当一台主机同时连接到两个网络上时，该主机就必须同时具有两个相应的 IP 地址，其网络前缀必须是不同的。</p>
+<p>一个网络是具有相同网络前缀的主机的集合，用转发器或交换机连接起来的若干个局域网仍可认为是一个网络，是一个更大的局域网，具有相同的网络前缀，具有不同网络前缀的局域网必须使用路由器进行互连。</p>
+<p>当两个路由器直接相连时（点对点信道），两个端口分不分配 IP 地址均可。</p>
+<p>IP 数据报在转发过程中的源 IP 地址和目的 IP 地址始终保持不变，而对应的 MAC 帧中的源 MAC 地址和目的 MAC 地址是不断变化的，路由器只会根据目的 IP 地址进行转发。</p>
+<p>地址解析协议 ARP：已经知道了局域网内的某个计算机（或路由器）的 IP 地址，需要找出其相应的 MAC 地址。ARP 协议主要使用广播+高速缓存+生存时间的方式，当主机 A 要想本局域网上的某台主机 B 发送 IP 数据报时，就先在其 ARP 高速缓存中查看有无主机 B 的 IP 地址，如果有就能查出对应的 MAC 地址，如果查不到就局域网广播“我的 IP 是 XXX，MAC 是 XXX，我想知道 IP 为 XXX 的主机的 MAC 地址”，主机 B 在收到后单播回响应分组，A、B 主机都以一定的生存时间缓存 IP-MAC 对应信息。</p>
+<p>注意当 IP 数据报的总长度超过数据链路层设置的最大传输单元 MTU 时，需要进行分片，即将 IP 数据报的数据部分分成好几片，分别加上首部组成多个小的 IP 数据报，在接收端的网络层再对分片进行拼接。</p>
+<p>IP 数据报首部格式中的首部检验和只负责 IP 数据报的首部检验，之所以在数据链路层提供 CRC 的基础上还需在网络层进行检验的目的是，考虑 MAC 帧和 IP 数据报的互相转换过程（从数据链路层到网络层，从网卡到内存）可能带来的比特差错。</p>
+<p>转发表的形式：最长前缀匹配。</p>
+<p>加速查找转发表的方法：唯一前缀+二叉线索树</p>
+<p>网络层的网际控制报文协议 ICMP，ICMP 报文整体作为 IP 数据报的数据部分发送，允许主机或路由器报告差错情况和提供有关异常情况的报告，ICMP 的一个重要应用就是分组网间探测 PING，用来测试两台主机之间的连通性，PING 是应用层直接使用网络层 ICMP 的一个例子，它没有通过运输层的 TCP 或 UDP。</p>
+<p>IPV6 有 128 位，例：68E6:8C64:FFFF:FFFF:0:1180:960A:FFFF</p>
+<p>IPV4 向 IPV6 过渡：要么路由器支持双协议栈，要么采用隧道技术，即将 IPV6 数据报作为 IPV4 数据报的数据部分进行传输。</p>
+<p>路由选择协议需要保证最终一定能到达+选出的整体路径尽可能好，路由选择协议包括内部网关协议和外部网关协议，内部网关协议作用于整个自治系统内部，外部网关协议作用于所有自治系统之间，所谓自治系统指的是在单一技术管理下的许多网络、IP 地址以及路由器。</p>
+<p>内部网关协议 RIP：适用于小型网络，能找到两点间跳数最少的路径，采用的方法是相邻路由器不断交换当前本路由器所知道的全部信息直至收敛，特点是坏消息传播慢好消息传播快。</p>
+<p>内部网关协议 OSPF：适用于大型网络，每个路由器都使用泛洪法向本自治系统中所有其他路由器发送本路由器和相邻所有路由器的“度量”，这个“度量”可以是费用、距离、时延、带宽等等。这样每个路由器都知道了整个自治系统的拓扑信息，利用 Dijkstra 可以得到自己的路由表。</p>
+<p>外部网关协议 BGP：一个自治系统中的路由器要到达另一个自治系统中的路由器，中间可能经过多个自治系统，由于不同自治系统采取不同的 IGP 协议，有着不同的线路质量衡量方式，因此 BGP 协议无法简单地以线路质量在多个自治系统间选择路由，只要求满足可达性即可，具体 BGP 协议过程参考 P171。</p>
+<p>路由器的结构：路由器有多个输入端口用于接收，多个输出端口用于发送，每个端口都需要网络适配器进行物理层和数据链路层的处理，且无论输出端口还是输入端口都设有 IP 数据报的缓存区，一旦满了就会将后来的 IP 数据报丢弃，产生溢出。</p>
+<p>IP 多播：在一对多通信中，多播相比于单播可以大大节约网络资源，互联网范围内的多播要靠多播路由器来实现，多播路由器可以识别多播数据报（当然也可以转发普通的单播 IP 数据报），IPV4 地址中的所有 D 类地址被划分为多播组标识符，所有多播数据报的目的地址写入的就是多播组标识符，一个计算机如果参加了某个多播组，那么它既有自己的 IP 地址也有自己的多播组标识符。IP 多播需要两种协议，第一种是 IGMP 协议，作用是让连接在本地局域网上的多播路由器知道本局域网上是否有主机参加或退出了某个多播组，这样才可以进行局域网内的多播交付。第二种是多播路由选择协议，目的是针对多播 IP 数据报进行路由选择。</p>
+<p>如果要设置一个不接入公网的本地网络，那么 IP 理论上是可以自己分配的，但是一旦这个本地网络中有路由器通过 ISP 接入了公网，随意分配的本地 IP 和公网 IP 就会产生二义性问题，因此我们规定了 IPV4 中的三个地址块只能用于本地 IP 地址，在互联网中的所有路由器，对目的地址是本地地址的 IP 数据报一律不进行转发。显然，全世界可能有很多本地互联网具有相同的 IP 地址，但这并不会引起麻烦，因为这些本地地址仅在本机构内部使用。</p>
+<p>虚拟专用网 VPN 可以让分隔世界两地的两个局域网拥有相同的网络前缀，并且在使用时就像是同一个子网，另一种远程接入 VPN 允许用户计算机在远端通过互联网接入公司的子网，，VPN 主要用到隧道技术，具体见 P187。</p>
+<p>网络地址转换 NAT：一个本地局域网要和外部通信，可以采用本地局域网全部分配公网 IP 的方式，也可以采用全部分配本地 IP+NAT 的方式，后者只需要局域网中有一个装有 NAT 软件的路由器，并且路由器的对外端口分配了公网 IP 即可。注意普通路由器在转发分组时是工作在网络层的，而 NAT 路由器还需要查看和转换运输层的端口号。具体见 P188。IP 数据报的首部只包含源 IP 和目的 IP，UDP 数据报和 TCP 报文段的首部才包含源端口和目的端口。</p>
+<h4 id="第五章运输层"><a href="#第五章运输层" class="headerlink" title="第五章运输层"></a>第五章运输层</h4><p>运输层作用：对应用层提供的服务是：在网络层提供网络中任意两主机间的不可靠 IP 数据报传输的基础上，使用不同的协议，可以向上层提供网络中任意两主机的任意两进程&#x2F;线程间的可靠 TCP 字节流传输&#x2F;不可靠 UDP 数据报分组传输。</p>
+<p>在应用层和运输层之间的界面上，设置了一些本计算机应用层中的各进程在和运输层交互时的层间接口。当应用层要发送数据时，应用进程就把数据发送到适当的端口，然后运输层从该端口读取数据，当运输层收到对方主机发来的数据时，就把数据发送到适当的端口，然后应用进程就从该端口读取这些数据。</p>
+<p>端口号分为：服务器端使用的端口号（最主要是熟知端口号），客户端使用的端口号</p>
+<p>用户数据报协议 UDP 只在 IP 的数据报服务之上增加了很少一点的功能，这就是复用和分用的功能以及差错检测的功能，差错检测范围是整个 UDP 数据报。</p>
+<p>UDP 是无连接的、尽最大努力交付的、面向报文的（不会对应用层下来的分组进行分片，而是一整个打包成 UDP 数据报）、没有拥塞控制、支持一对多。</p>
+<p>TCP 是面向连接的、点对点的、可靠交付的、全双工通信的、面向字节流的。</p>
+<p>利用自动重传请求 ARQ，可以在不可靠的传输网络上实现可靠的通信。具体来讲，发送端只有在接收到确认分组后才会进行下一个分组的发送，因为发送端接收到确认分组说明接收端一定在某一时刻收到了正确的分组，而一定时间内发送端没有收到确认分组就会进行分组的重传，这里没有收到确认分组的原因可能是分组发送过程中出现丢失&#x2F;出错&#x2F;拥塞中，也可能是确认分组返回的过程中出现丢失&#x2F;出错&#x2F;拥塞中，但无论哪种情况，重传都有助于发送端尽快收到确认分组以便进行下一分组的传输。</p>
+<p>连续 ARQ 用来解决 ARQ 的信道利用率低的问题，发送窗口中的所有分组都会被依次发送，接收端的确认分组会告诉发送端截止到哪个分组之前的分组都接收到，发送窗口滑动，如果超时没有收到确认，将会对发送窗口所有分组进行重传。连续 ARQ 的可靠通信可以抽象地理解为：发送端发送几个连续分组，过一会接收端接收到了，过了一会发送端发送后面的几个连续分组，以此类推。</p>
+<p>TCP 可靠传输的实现是把连续 ARQ 中的分组变成了字节流，它的发送窗口长度以字节为单位，但是具体发送过程是取出一些字节，分片后加入首部组成 TCP 报文段并交由网络层发送，其次 TCP 可靠传输的实现还多出了发送缓存和接收缓存。TCP 可靠传输可以抽象地理解为：发送端给接收端发送一段字节流，过一会发送端又给接收端发送一段字节流以此类推。TCP 提供可靠字节流传输服务，发送端把发送进程的应用层分组组合成字节流，接收端把字节流拆分成应用层分组发给接收进程。</p>
+<p>TCP 报文段也具有差错检测的功能，差错检测范围是整个 TCP 报文段。TCP 报文段和 UDP 数据报地位很像，都是生成后直接交付网络层传输，都直接享受网络层的两主机间不可靠 IP 数据报传输服务，两者都可能丢失、出错或拥塞。</p>
+<p>TCP 流量控制见 P236，TCP 拥塞控制见 P238</p>
+<p>TCP 不像 UDP 一样直接传输应用层分组，TCP 传输应用层分组前要先建立连接，这个建立连接指的是通信双方要互知存在、协定参数。</p>
+<p>TCP 三次握手见 P247，四次挥手见 P249</p>
+<h4 id="第六章应用层"><a href="#第六章应用层" class="headerlink" title="第六章应用层"></a>第六章应用层</h4><p>某些计算机应用需要网络进程间通信，而运输层提供的仅是网络进程间的分组传输，因此需要针对不同应用的需求设计不同的应用层协议来实现相应的特定通信，应用层协议依然需要设计语法、语义、同步这三要素。</p>
+<p>应用层很多协议都是基于客户服务器方式，这里的客户和服务器都指的是进程，客户是服务请求方，服务器是服务提供方。</p>
+<p>域名系统 DNS 的作用是让人们可以根据域名查到 IP，它被设计成一个联机分布式数据库系统，DNS 报文会被打包成 UDP 数据报发送。</p>
+<p>域名格式：四级域名.三级域名.二级域名.顶级域名。一个单位一旦拥有了一个域名，它就可以自己决定是否要进一步划分其下属的子域，而不必得到上级机构的批准，域名树的树叶就是单台计算机的名字，它不能再继续往下划分了。</p>
+<p>根域名服务器、顶级域名服务器、权限域名服务器、本地域名服务器。当计算机要查询域名时，首先向本地域名服务器递归查询，如果查不到，本地域名服务器会向根域名服务器迭代查询。</p>
+<p>文件传送协议 FTP：基于 TCP，对一个远端计算机中某个文件的修改是通过先传送一份到本地，本地修改，再把修改后的文件传送回去。</p>
+<p>简单文件传送协议 TFTP：基于 UDP。</p>
+<p>万维网是一个分布式的超媒体系统。万维网应用指的是：点击一个超文本中的超链接，显示出另一个超文本&#x2F;超媒体，然而这个超文本&#x2F;超媒体是来自于网络中另一台计算机上的资源，这显然需要网络进程间通信，也就是需要应用层协议。</p>
+<p>域名查询应用需要网络进程间通信，需要设计应用层 DNS 协议来实现特定通信，文件传送应用需要网络进程间通信，应用层的 FTP 协议的特定通信只是实现方式之一，万维网应用需要网络进程间通信，应用层的 HTTP 协议实现的特定通信是主要方式，当然也有其他应用层协议。</p>
+<p>统一资源定位符 URL 是用来表示互联网中某个资源的位置和准备用哪种应用层协议的特定通信来获取这个资源。</p>
+<p>URL 格式：协议:&#x2F;&#x2F;主机名:端口&#x2F;路径</p>
+<p>主机名是万维网文档所存放的主机的域名，通常以 www 开头，端口号经常被省略掉，因为往往使用默认端口号，如 HTTP 默认端口 80（意思是大多数万维网服务器默认把 HTTP 内容分发进程绑定到 80 端口）。</p>
+<p>使用 HTTP 的 URL 的路径为空的话，默认是请求主页 HTML 资源。</p>
+<p>HTTP 协议过程：客户进程与一直运行着的服务器进程三次握手建立 TCP 连接，客户进程发送 HTTP 请求报文，服务器进程进行相应处理，服务器进程回复 HTTP 响应报文，四次挥手断开 TCP 连接。HTTP 报文是 ASCII 码串结构。HTTP&#x2F;1.1 相比于 HTTP&#x2F;1.0 使用的是持续连接+非流水线方式&#x2F;流水线方式。HTTP&#x2F;2.0</p>
+<p>代理服务器又称为万维网高速缓存，它可以构成内容分发网络 CDN，具体见 P279。</p>
+<p>在 HTTP 中使用 Cookie 可以帮助万维网服务器识别用户，但使用 Cookie 需要得到用户同意。Cookie 具体工作方式是：用户第一次连接万维网服务器时，万维网服务器为用户产生一个识别码，它将识别码和用户 Session 的对应关系存储起来并且将识别码发送给用户，接下来用户的所有 HTTP 请求报文都会带有这个识别码，因此万维网服务器每次都能够识别这个用户。</p>
+<p>超文本标记语言 HTML 是一种制作万维网页面的标准语言。</p>
+<p>万维网的信息检索系统：万维网储存了海量的信息，如果我们不知道要找的信息在何网点，就需要使用万维网的搜索工具。</p>
+<ul>
+<li>全文检索搜索引擎：引擎在各个网站爬取信息，并建立一个很大的在线索引数据库供用户查询。如谷歌。</li>
+<li>分类目录搜索引擎：利用各个网站向搜索引擎提交的网站信息，建立分类目录的数据库供用户查询。如新浪网。</li>
+</ul>
+<p>动态主机配置协议 DHCP：连接到互联网的计算机的协议软件需要配置的项目包括：IP 地址、子网掩码、默认路由器的 IP 地址、域名服务器的 IP 地址。当网络情况发生变化时（比如接入到了新的子网中），就需要重新配置 IP 地址，DHCP 提供了即插即用连网机制，允许一台计算机加入新的网络和获取 IP 地址而不用手动参与。具体见 P304。</p>
+<p>操作系统向外提供的 API 的原理：当某个应用进程启动系统调用时，控制权就从应用进程传递给了操作系统，操作系统执行完内部过程后，控制权被归还到应用进程。</p>
+<p>如果我们还有一些特定的应用需要互联网的支持，但这些应用又不适用于当前的已经标准化的互联网应用层协议，这时我们可以通过调用操作系统向外提供的 API 来操纵位于操作系统中的 TCP&#x2F;IP 协议软件。当应用进程要进行网络通信时，操作系统会为此进程创建一个套接字（套接字指的是网络通信所需系统资源集合，如存储器空间、网络带宽等），建立一个套接字描述符到套接字的映射并把套接字描述符返回给应用进程，之后应用进程进行的网络操作都可以使用这个套接字描述符。</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/notes/tags/%E5%85%AB%E8%82%A1%E6%96%87/" class="print-no-link">#八股文</a>
+      
+        <a href="/notes/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/" class="print-no-link">#计算机网络</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>计算机网络笔记</div>
+      <div>https://howard1209a.github.io/notes/2023/10/29/总结篇 计算机网络笔记/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>howard1209a</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2023年10月29日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/notes/2023/10/29/%E9%9A%8F%E7%AC%94%E7%AF%87%20%E4%BB%80%E4%B9%88%E6%98%AFdll%E6%96%87%E4%BB%B6%E3%80%81lib%E6%96%87%E4%BB%B6/" title="什么是dll文件、lib文件">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">什么是dll文件、lib文件</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/notes/2023/10/29/%E5%85%AB%E8%82%A1%E7%AF%87%20%E5%AF%B9%E7%A7%B0%E6%80%A7%E5%8A%A0%E5%AF%86%E4%B8%8E%E9%9D%9E%E5%AF%B9%E7%A7%B0%E6%80%A7%E5%8A%A0%E5%AF%86/" title="对称性加密与非对称性加密">
+                        <span class="hidden-mobile">对称性加密与非对称性加密</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/notes/js/events.js" ></script>
+<script  src="/notes/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/notes/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/notes/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/notes/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
